@@ -5,8 +5,14 @@ import random
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+from spacy.language import Language
+from spacy_langdetect  import LanguageDetector
 
-pln = spacy.load("pt_core_news_sm")
+def get_lang_detector(nlp, name):
+  return LanguageDetector()
+
+nlp = spacy.load("pt_core_news_sm")
+print(nlp.pipe_names)
 #check do carregamento
 #print(pln)
 
@@ -16,7 +22,8 @@ pln = spacy.load("pt_core_news_sm")
 baseDeDados = pd.read_csv("DataBaseFinal.csv", encoding = 'utf-8')
 baseDeDados = baseDeDados.astype(str)
 
-"""checks da base de dados
+"""
+#checks da base de dados
 print(baseDeDados.shape) #verificar quantidade de registros e nro de colunas
 print(baseDeDados.head()) #verificar primeiros registros
 print(baseDeDados.tail() )#verificar ultimos registros
@@ -44,7 +51,7 @@ stop_words = STOP_WORDS
     remoção de stop words """
 def preprocessamento(texto):
   texto = texto.lower()
-  documento = pln(texto)
+  documento = nlp(texto)
   
   lista = []
   for token in documento:
@@ -64,7 +71,8 @@ print(teste)
 #aplicando o pre processamento na nossa base de dados
 baseDeDados['texto'] = baseDeDados['texto'].apply(preprocessamento)
 
-"""check do tratamento da base de dados
+"""
+#check do tratamento da base de dados
 print(baseDeDados.head(10))
 print(baseDeDados.tail())
 """
@@ -130,6 +138,7 @@ for texto, Comando in zip(baseDeDados['texto'],baseDeDados['Comando']):
 
   baseDeDadosFinal.append([texto, dic.copy()])
 
+"""
 #Check do dicionário
 print(len(baseDeDadosFinal))
 print(baseDeDadosFinal[233][0])
@@ -137,11 +146,18 @@ print(baseDeDadosFinal[233][1])
 """
 
 
+
+"""
+Language.factory("language_detector", func=get_lang_detector)
+nlp.add_pipe('language_detector')
+"""
+
 #Criando o classificador
 modelo = spacy.blank('pt')
-print(modelo.pipe_names)
+#print(modelo.pipe_names)
 
-categorias = modelo.add_pipe("textcat")
+"""
+categorias = modelo.create_pipe()
 categorias.add_label("ACORDAR")
 categorias.add_label("DORMIR")
 categorias.add_label("GIRAR")
@@ -155,5 +171,37 @@ categorias.add_label("FALAR SOBRE ADA")
 categorias.add_label("MÚSICA")
 categorias.add_label("SOLETRAR")
 categorias.add_label("DANÇAR")
-modelo.add_pipe(categorias)
-historico = []"""
+"""
+#print(nlp.pipe_names)
+
+ner = nlp.get_pipe("ner")
+#ner = modelo.create_pipe('ner')
+ner.add_label("ACORDAR")
+ner.add_label("DORMIR")
+ner.add_label("GIRAR")
+ner.add_label("LEVANTAR BRAÇOS")
+ner.add_label("PIADA")
+ner.add_label("FALAR O NOME")
+ner.add_label("ESTÁ BEM")
+ner.add_label("APRESENTAR")
+ner.add_label("FALAR SOBRE SEMEAR")
+ner.add_label("FALAR SOBRE ADA")
+ner.add_label("MÚSICA")
+ner.add_label("SOLETRAR")
+ner.add_label("DANÇAR")
+
+pipe_exceptions = ["ner", "trf_wordpiecer", "trf_tok2vec"]
+unaffected_pipes = [pipe for pipe in nlp.pipe_names if pipe not in pipe_exceptions]
+
+doc=nlp("Elon Musk, Bill Gates, Steve Jobs, 20 de Março, 2021")
+for ent in doc.ents:
+  print(ent.text,ent.label_)
+
+"""
+#print(nlp.pipe_names)
+doc = nlp("Acorda")
+print("Comando", [(ent.text, ent.label_) for ent in doc.ents])
+
+modelo.add_pipe(ner)
+historico = []
+"""
