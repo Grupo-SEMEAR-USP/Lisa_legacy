@@ -8,8 +8,10 @@ import matplotlib.pyplot as plt
 from spacy.language import Language
 from spacy_langdetect  import LanguageDetector
 
+"""
 def get_lang_detector(nlp, name):
   return LanguageDetector()
+"""
 
 nlp = spacy.load("pt_core_news_sm")
 print(nlp.pipe_names)
@@ -154,7 +156,7 @@ nlp.add_pipe('language_detector')
 
 #Criando o classificador
 modelo = spacy.blank('pt')
-#print(modelo.pipe_names)
+print(modelo.pipe_names)
 
 """
 categorias = modelo.create_pipe()
@@ -174,6 +176,7 @@ categorias.add_label("DANÇAR")
 """
 #print(nlp.pipe_names)
 
+"""
 ner = nlp.get_pipe("ner")
 #ner = modelo.create_pipe('ner')
 ner.add_label("ACORDAR")
@@ -197,7 +200,6 @@ doc=nlp("Elon Musk, Bill Gates, Steve Jobs, 20 de Março, 2021")
 for ent in doc.ents:
   print(ent.text,ent.label_)
 
-"""
 #print(nlp.pipe_names)
 doc = nlp("Acorda")
 print("Comando", [(ent.text, ent.label_) for ent in doc.ents])

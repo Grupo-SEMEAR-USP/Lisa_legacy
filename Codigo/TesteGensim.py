@@ -57,4 +57,4 @@ cv = CountVectorizer(stop_words='english')
 data_cv = cv.fit_transform(data_clean.transcript)
 data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())
 data_dtm.index = data_clean.index
-data_dtm
+data_dtm 
