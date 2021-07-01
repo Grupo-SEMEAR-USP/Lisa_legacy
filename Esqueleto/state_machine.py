@@ -55,71 +55,70 @@ class MaqEstados:
 
 			# depending on what we received as the input
 			# change the current state of the fsm
-			if msg == "xingar":
+			if msg == comando.ofensa:
 				if(random.randint(1,10) < 8):
 					self.current_state = self.bravo
-					print("Inveja mata, sabia? -> Bravo\n")
+					print("Inveja mata, sabia?")
+					print("-> Bravo\n")
 				else:
 					self.current_state = self.triste
-					print("ok então ;-; -> Triste\n")
-			elif msg == 'elogio':
-				print(':D -> Feliz\n')
+					print("ok então ;-;")
+					print("-> Triste\n")
+			elif msg == comando.elogio:
+				print(':D')
+				print("-> Feliz\n")
 				self.current_state = self.feliz
-			elif msg == 'dança':
-				print('┗(＾0＾)┓ -> Dançando\n')
+			elif msg == comando.dance:
+				print('┗(＾0＾)┓')
+				print("-> Dançando\n")
 				self.current_state = self.dançando
 			else:
 				# Qualquer outra coisa ele dorme
-				print('Vou dormir -> Dormindo\n')
+				print('Vou dormir\n')
+				print("-> Dormindo\n")
 				self.current_state = self.dormindo
-				break
 
 	@prime
 	def _create_bravo(self):
 		while True:
 			msg = yield
 
-			if msg == 'desculpa':
-				print("ok... -> Neutro\n")
+			if msg == comando.desculpa:
+				print("ok...")
+				print("-> Neutro\n")
 				self.current_state = self.neutro
-			else:
-				# on receiving any other input, break the loop
-				# so that next time when someone sends any input to
-				# the coroutine it raises StopIteration
-				break
 
 	@prime
 	def _create_triste(self):
 		while True:
 			msg = yield
 
-			if msg == 'elogio':
-				print("ok... -> neutro\n")
+			if msg == comando.elogio:
+				print("ok...")
+				print("-> Neutro\n")
 				self.current_state = self.neutro
-			else:
-				# on receiving any other input, break the loop
-				# so that next time when someone sends any input to
-				# the coroutine it raises StopIteration
-				break
 
 	@prime
 	def _create_feliz(self):
 		while True:
 			msg = yield
 
-			if msg == 'dança':
-				print('┏(･o･)┛♪┗ (･o･) ┓ -> Dançando\n')
+			if msg == comando.dance:
+				print('┏(･o･)┛♪┗ (･o･) ┓')
+				print("-> Dançando\n")
 				self.current_state = self.dançando
-			if msg == '...':
-				print('._. -> Neutro\n')
+			if msg == comando.silencio:
+				print('._.')
+				print("-> Neutro\n")
 				self.current_state = self.neutro
 	
 	@prime
 	def _create_dançando(self):
 		while True:
 			msg = yield
-			if msg == 'stop':
-				print('Ok! -> Feliz\n')
+			if msg == comando.stop:
+				print('Ok!')
+				print("-> Feliz\n")
 				self.current_state = self.feliz
 	
 	@prime
@@ -127,7 +126,13 @@ class MaqEstados:
 		while True:
 			msg = yield
 
-			print("Me deixa dormir -> Dormindo\n")
+			if msg == comando.acordar:
+				print("afs afs")
+				print("-> Neutro\n")
+				self.current_state = self.neutro
+			else:
+				print("Me deixa dormir")
+				print("-> Dormindo\n")
 
 
 def main():
