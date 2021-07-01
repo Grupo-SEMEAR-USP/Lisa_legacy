@@ -10,7 +10,7 @@ Um exemplo disso é a maquina de estado desenvolvida para vários comandos diver
 Além disso, nota-se na imagem que alguns comandos não serão obedecidos se o robô estiver em determinado estado emocional, como o comando "dançar" também, que só pode ser realizado quando este está "feliz", "neutro" ou "triste".
 
 Alguns comentários foram adicionados aos desenhos, para facilitar compreensão e auxiliar no entendimento na hora de construir o código em Python. Um exemplo de comentário pode ser visto na imagem abaixo, referente à máquina de estados "Tocar música".
-"[Máquina de Estados - Tocar Música](https://github.com/ADA-EC/SEMEADA/blob/main/Maquina_Estados/Tocar_musica.png)
+![Máquina de Estados - Tocar Música](https://github.com/ADA-EC/SEMEADA/blob/main/Maquina_Estados/Tocar_musica.png)
 
 ## Membros
 - Érika Hortência
