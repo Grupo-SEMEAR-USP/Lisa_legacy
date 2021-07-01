@@ -3,6 +3,11 @@ Projeto realizado em parceria com o grupo SEMEAR com o objetivo de construir um 
 
 ## Tecnologias Usadas
 
+## Máquina de Estados
+Para realizar o projeto, fizemos algumas máquinas de estados modificadas que indicam o estado do robô após realizar os comandos.
+Um exemplo disso é a maquina de estado desenvolvida para vários comandos diversos, mostrada abaixo. Nela, após realizar um comando como dançar, ele fica automaticamente no estado de "feliz".
+Além disso, nota-se na imagem que alguns comandos não serão obedecidos se o robô estiver em determinado estado emocional, como o comando "dançar" também, que só pode ser realizado quando este está "feliz", "neutro" ou "triste".
+
 
 ## Membros
 - Érika Hortência
