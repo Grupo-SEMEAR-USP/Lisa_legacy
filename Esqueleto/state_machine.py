@@ -11,38 +11,43 @@ def prime(fn):
 class MaqEstados:
 	def __init__(self):
 		# initializing states
-		self.neutro = self._create_neutro()
-		self.bravo = self._create_bravo()
-		self.triste = self._create_triste()
-		self.feliz = self._create_feliz()
-		self.dançando = self._create_dançando()
-		self.dormindo = self._create_dormindo()
+		self.neutro = (self._create_neutro(), "Neutro")
+		self.bravo = (self._create_bravo(), "Bravo")
+		self.triste = (self._create_triste(), "Triste")
+		self.feliz = (self._create_feliz(), "Feliz")
+		self.dançando = (self._create_dançando(), "Dançando")
+		self.dormindo = (self._create_dormindo(), "Dormindo")
+		self.handsup = (self._create_handsup(), "handsup")
 		
 		# setting current state of the system
 		self.current_state = self.neutro
+		self.previous_state = self.neutro
 
-		# stopped flag to denote that iteration is stopped due to bad
+		# Stopped flag to denote that iteration is Stopped due to bad
 		# input against which transition was not defined.
-		self.stopped = False
+		self.Stopped = False
 
 	def send(self, msg):
 		"""The function sends the current input to the current state
-		It captures the StopIteration exception and marks the stopped flag.
+		It captures the StopIteration exception and marks the Stopped flag.
 		"""
 		try:
-			self.current_state.send(msg)
+			if(msg.isnumeric()):
+				self.current_state[0].send(int(msg))
+			else:
+				self.current_state[0].send(msg)
 		except StopIteration:
 			print("Finalizou")
-			self.stopped = True
+			self.Stopped = True
 		
 	def does_match(self):
 		"""The function at any point in time returns if till the current input
 		the string matches the given regular expression.
 
 		It does so by comparing the current state with the end state `q3`.
-		It also checks for `stopped` flag which sees that due to bad input the iteration of FSM had to be stopped.
+		It also checks for `Stopped` flag which sees that due to bad input the iteration of FSM had to be Stopped.
 		"""
-		if self.stopped:
+		if self.Stopped:
 			return False
 		return self.current_state == self.q3
 	
@@ -68,25 +73,37 @@ class MaqEstados:
 				print(':D')
 				print("-> Feliz\n")
 				self.current_state = self.feliz
-			elif msg == comando.dance:
+			elif msg == comando.Dancar:
 				print('┗(＾0＾)┓')
 				print("-> Dançando\n")
 				self.current_state = self.dançando
+			elif msg == comando.Levantar_bracos:
+				print('┗(＾0＾)┗')
+				print("-> Levantar Braço\n")
+				self.current_state = self.handsup
 			else:
 				# Qualquer outra coisa ele dorme
 				print('Vou dormir\n')
 				print("-> Dormindo\n")
 				self.current_state = self.dormindo
 
+			self.previous_state = self.neutro
+
 	@prime
 	def _create_bravo(self):
 		while True:
 			msg = yield
 
-			if msg == comando.desculpa:
+			if msg == comando.Desculpa:
 				print("ok...")
 				print("-> Neutro\n")
 				self.current_state = self.neutro
+			elif msg == comando.Levantar_bracos:
+				print('┗(＾0＾)┗')
+				print("-> Levantar Braço\n")
+				self.current_state = self.handsup
+
+			self.previous_state = self.bravo
 
 	@prime
 	def _create_triste(self):
@@ -97,13 +114,19 @@ class MaqEstados:
 				print("ok...")
 				print("-> Neutro\n")
 				self.current_state = self.neutro
+			elif msg == comando.Levantar_bracos:
+				print('┗(＾0＾)┗')
+				print("-> Levantar Braço\n")
+				self.current_state = self.handsup
+				
+			self.previous_state = self.triste
 
 	@prime
 	def _create_feliz(self):
 		while True:
 			msg = yield
 
-			if msg == comando.dance:
+			if msg == comando.Dancar:
 				print('┏(･o･)┛♪┗ (･o･) ┓')
 				print("-> Dançando\n")
 				self.current_state = self.dançando
@@ -111,28 +134,56 @@ class MaqEstados:
 				print('._.')
 				print("-> Neutro\n")
 				self.current_state = self.neutro
+			elif msg == comando.Levantar_bracos:
+				print('┗(＾0＾)┗')
+				print("-> Levantar Braço\n")
+				self.current_state = self.handsup
+				
+			self.previous_state = self.feliz
 	
 	@prime
 	def _create_dançando(self):
 		while True:
 			msg = yield
-			if msg == comando.stop:
+			if msg == comando.Stop:
 				print('Ok!')
 				print("-> Feliz\n")
 				self.current_state = self.feliz
+				
+			self.previous_state = self.dançando
+	
+	@prime
+	def _create_handsup(self):
+		while True:
+			msg = yield
+
+			if msg == comando.Stop:
+
+				print('Ok!')
+				if(random.randint(1,10) < 8):
+					self.current_state = self.previous_state
+					print("->", self.previous_state[1],"\n")
+				else:
+					self.current_state = self.feliz
+					print("Oba")
+					print("-> Feliz\n")
+					
+			self.previous_state = self.handsup
 	
 	@prime
 	def _create_dormindo(self):
 		while True:
 			msg = yield
 
-			if msg == comando.acordar:
+			if msg == comando.Acordar:
 				print("afs afs")
 				print("-> Neutro\n")
 				self.current_state = self.neutro
 			else:
 				print("Me deixa dormir")
 				print("-> Dormindo\n")
+				
+			self.previous_state = self.dormindo
 
 
 def main():

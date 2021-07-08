@@ -15,6 +15,8 @@ class comando:
 	ADA = 12
 	Musica = 13
 	Soletrar = 14
+	Stop = 15
+	Desculpa = 16
 
 	def _init_(self):
 		pass
