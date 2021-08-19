@@ -18,6 +18,8 @@ class MaqEstados:
 		self.dançando = (self._create_dançando(), "Dançando")
 		self.dormindo = (self._create_dormindo(), "Dormindo")
 		self.handsup = (self._create_handsup(), "handsup")
+		self.falar_nome = (self._create_falar_nome(), "Falar_nome")
+		self.falar_projeto = (self._create_falar_projeto(), "Falar_projeto")
 		
 		# setting current state of the system
 		self.current_state = self.neutro
@@ -81,6 +83,14 @@ class MaqEstados:
 				print('┗(＾0＾)┗')
 				print("-> Levantar Braço\n")
 				self.current_state = self.handsup
+			elif msg == comando.Falar_nome:
+				print("Meu nome é 'Insira um nome de robô aqui'")
+				print("-> Falar Nome\n")
+				self.current_state = self.falar_nome
+			elif msg == comando.Falar_projeto:
+				print("Eu sou um robô humanoide ... Mais texto sobre o projeto")
+				print("-> Falar Projeto\n")
+				self.current_state = self.falar_projeto
 			else:
 				# Qualquer outra coisa ele dorme
 				print('Vou dormir\n')
@@ -102,6 +112,14 @@ class MaqEstados:
 				print('┗(＾0＾)┗')
 				print("-> Levantar Braço\n")
 				self.current_state = self.handsup
+			elif msg == comando.Falar_nome:
+				print("Meu nome é 'Insira um nome de robô aqui'")
+				print("-> Falar Nome\n")
+				self.current_state = self.falar_nome
+			elif msg == comando.Falar_projeto:
+				print("Eu sou um robô humanoide ... Mais texto sobre o projeto")
+				print("-> Falar Projeto\n")
+				self.current_state = self.falar_projeto
 
 			self.previous_state = self.bravo
 
@@ -118,6 +136,15 @@ class MaqEstados:
 				print('┗(＾0＾)┗')
 				print("-> Levantar Braço\n")
 				self.current_state = self.handsup
+			elif msg == comando.Falar_nome:
+				print("Meu nome é 'Insira um nome de robô aqui'")
+				print("-> Falar Nome\n")
+				self.current_state = self.falar_nome
+			elif msg == comando.Falar_projeto:
+				print("Eu sou um robô humanoide ... Mais texto sobre o projeto")
+				print("-> Falar Projeto\n")
+				self.current_state = self.falar_projeto
+			
 				
 			self.previous_state = self.triste
 
@@ -138,6 +165,14 @@ class MaqEstados:
 				print('┗(＾0＾)┗')
 				print("-> Levantar Braço\n")
 				self.current_state = self.handsup
+			elif msg == comando.Falar_nome:
+				print("Meu nome é 'Insira um nome de robô aqui'")
+				print("-> Falar Nome\n")
+				self.current_state = self.falar_nome
+			elif msg == comando.Falar_projeto:
+				print("Eu sou um robô humanoide ... Mais texto sobre o projeto")
+				print("-> Falar Projeto\n")
+				self.current_state = self.falar_projeto
 				
 			self.previous_state = self.feliz
 	
@@ -169,7 +204,27 @@ class MaqEstados:
 					print("-> Feliz\n")
 					
 			self.previous_state = self.handsup
+
+	@prime
+	def _create_falar_nome(self):
+		while True:
+			msg = yield
+			if msg == comando.Stop:
+				print("Ok!")
+				self.current_state = self.previous_state
+				print("->", self.previous_state[1],"\n")
+				self.previous_state = self.falar_nome
 	
+	@prime
+	def _create_falar_projeto(self):
+		while True:
+			msg = yield
+			if msg == comando.Stop:
+				print("Ok!")
+				self.current_state = self.previous_state
+				print("->", self.previous_state[1],"\n")
+				self.previous_state = self.falar_projeto
+
 	@prime
 	def _create_dormindo(self):
 		while True:

@@ -17,6 +17,8 @@ class comando:
 	Soletrar = 14
 	Stop = 15
 	Desculpa = 16
+	Falar_nome = 17
+	Falar_projeto = 18
 
 	def _init_(self):
 		pass
