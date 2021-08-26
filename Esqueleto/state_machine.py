@@ -21,6 +21,8 @@ class MaqEstados:
 		self.falar_nome = (self._create_falar_nome(), "Falar_nome")
 		self.falar_projeto = (self._create_falar_projeto(), "Falar_projeto")
 		self.soletrando = (self._create_soletrando(), "Soletrando")
+		self.falar_ADA = (self._create_falar_ADA(),"Falar_sobre_ADA")
+		self.falar_SEMEAR = (self._create_falar_SEMEAR(),"Falar_sobre_SEMEAR")
 		
 		# setting current state of the system
 		self.current_state = self.neutro
@@ -95,6 +97,14 @@ class MaqEstados:
 			elif msg == comando.Soletrar:
 				print("-> Soletrando\nO que você quer que eu soletre?\n")
 				self.current_state = self.soletrando
+			elif msg == comando.ADA:
+				print("Falando sobre a ADA lalalala")
+				print("-> Falar sobre ADA\n")
+				self.current_state = self.falar_ADA
+			elif msg == comando.SEMEAR:
+				print("Falando sobre o SEMEAR lalalala")
+				print("-> Falar sobre SEMEAR\n")
+				self.current_state = self.falar_SEMEAR
 			else:
 				# Qualquer outra coisa ele dorme
 				print('Vou dormir\n')
@@ -127,6 +137,14 @@ class MaqEstados:
 			elif msg == comando.Soletrar:
 				print("-> Soletrando\nO que você quer que eu soletre?\n")
 				self.current_state = self.soletrando
+			elif msg == comando.ADA:
+				print("Falando sobre a ADA lalalala")
+				print("-> Falar sobre ADA\n")
+				self.current_state = self.falar_ADA
+			elif msg == comando.SEMEAR:
+				print("Falando sobre o SEMEAR lalalala")
+				print("-> Falar sobre SEMEAR\n")
+				self.current_state = self.falar_SEMEAR
 
 			self.previous_state = self.bravo
 
@@ -151,10 +169,17 @@ class MaqEstados:
 				print("Eu sou um robô humanoide ... Mais texto sobre o projeto")
 				print("-> Falar Projeto\n")
 				self.current_state = self.falar_projeto
-			
 			elif msg == comando.Soletrar:
 				print("-> Soletrando\nO que você quer que eu soletre?\n")
 				self.current_state = self.soletrando
+			elif msg == comando.ADA:
+				print("Falando sobre a ADA lalalala")
+				print("-> Falar sobre ADA\n")
+				self.current_state = self.falar_ADA
+			elif msg == comando.SEMEAR:
+				print("Falando sobre o SEMEAR lalalala")
+				print("-> Falar sobre SEMEAR\n")
+				self.current_state = self.falar_SEMEAR
 				
 			self.previous_state = self.triste
 
@@ -186,6 +211,14 @@ class MaqEstados:
 			elif msg == comando.Soletrar:
 				print("-> Soletrando\nO que você quer que eu soletre?\n")
 				self.current_state = self.soletrando
+			elif msg == comando.ADA:
+				print("Falando sobre a ADA lalalala")
+				print("-> Falar sobre ADA\n")
+				self.current_state = self.falar_ADA
+			elif msg == comando.SEMEAR:
+				print("Falando sobre o SEMEAR lalalala")
+				print("-> Falar sobre SEMEAR\n")
+				self.current_state = self.falar_SEMEAR
 				
 			self.previous_state = self.feliz
 	
@@ -336,8 +369,8 @@ class MaqEstados:
 			    	soletrar = soletrar + ("Ú com trema, ")
 			    if letter == "í":
 			    	soletrar = soletrar + ("I com acento agudo, ")
-			    if letter == "0":
-				soletrar = soletrar + ("Zero, ")
+			    """if letter == "0":
+					soletrar = soletrar + ("Zero, ")"""
 			    if letter == "1":
 			    	soletrar = soletrar + ("Um, ")
 			    if letter == "2":
@@ -360,6 +393,28 @@ class MaqEstados:
 			print("A palavra se soletra assim: ",soletrar, "\n->",self.previous_state[1])
 			self.current_state = self.previous_state
 			self.previous_state = self.soletrando
+		
+	@prime
+	def _create_falar_ADA(self):
+		while True:
+			msg = yield
+
+			if msg == comando.Stop:
+				print("Ok!")
+				self.current_state = self.previous_state
+				print("->", self.previous_state[1],"\n")
+			self.previous_state = self.falar_ADA
+	
+	@prime
+	def _create_falar_SEMEAR(self):
+		while True:
+			msg = yield
+
+			if msg == comando.Stop:
+				print("Ok!")
+				self.current_state = self.previous_state
+				print("->", self.previous_state[1],"\n")
+			self.previous_state = self.falar_SEMEAR
 			
 
 def main():
