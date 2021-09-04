@@ -25,6 +25,9 @@ class MaqEstados:
 		self.falar_ADA = (self._create_falar_ADA(),"Falar_sobre_ADA")
 		self.falar_SEMEAR = (self._create_falar_SEMEAR(),"Falar_sobre_SEMEAR")
 		self.piada_simples = (self._create_piada_simples(), "Piada sem transição")
+		self.piada_pergunta_e_resposta = (self._create_piada_pergunta_e_resposta(), "Piada pergunta e resposta")
+		self.piada_toc_toc = (self._create_piada_toc_toc(), "Piada sem toc toc")
+		self.piada = (self._create_piada(), "Piada")
 		
 		# setting current state of the system
 		self.current_state = self.neutro
@@ -33,6 +36,14 @@ class MaqEstados:
 		# Stopped flag to denote that iteration is Stopped due to bad
 		# input against which transition was not defined.
 		self.Stopped = False
+
+		# open jokes file
+		self.arquivo_pergunta_e_resposta = pd.read_csv("PIADA_Pergunta_e_Resposta.tsv", sep="	")
+		print(self.arquivo_pergunta_e_resposta)
+		self.arquivo_sem_transicao = pd.read_csv("PIADA_Sem_transição.tsv", sep="	")
+		print(self.arquivo_sem_transicao)
+		self.arquivo_toc_toc = pd.read_csv("PIADA_Toc_toc.tsv", sep="	")
+		print(self.arquivo_toc_toc)
 
 	def send(self, msg):
 		"""The function sends the current input to the current state
@@ -108,7 +119,8 @@ class MaqEstados:
 				print("-> Falar sobre SEMEAR\n")
 				self.current_state = self.falar_SEMEAR
 			elif msg == comando.Piada:
-				self.current_state = self.piada_simples
+				self.current_state = self.piada
+				self.current_state[0].send(0)
 			else:
 				# Qualquer outra coisa ele dorme
 				print('Vou dormir\n')
@@ -150,7 +162,8 @@ class MaqEstados:
 				print("-> Falar sobre SEMEAR\n")
 				self.current_state = self.falar_SEMEAR
 			elif msg == comando.Piada:
-				self.current_state = self.piada_simples
+				self.current_state = self.piada
+				self.current_state[0].send(0)
 
 			self.previous_state = self.bravo
 
@@ -187,7 +200,8 @@ class MaqEstados:
 				print("-> Falar sobre SEMEAR\n")
 				self.current_state = self.falar_SEMEAR
 			elif msg == comando.Piada:
-				self.current_state = self.piada_simples
+				self.current_state = self.piada
+				self.current_state[0].send(0)
 				
 			self.previous_state = self.triste
 
@@ -228,7 +242,8 @@ class MaqEstados:
 				print("-> Falar sobre SEMEAR\n")
 				self.current_state = self.falar_SEMEAR
 			elif msg == comando.Piada:
-				self.current_state = self.piada_simples
+				self.current_state = self.piada
+				self.current_state[0].send(0)
 				
 			self.previous_state = self.feliz
 	
@@ -430,13 +445,64 @@ class MaqEstados:
 	def _create_piada_simples(self):
 		while True:
 			msg = yield
-
-			file = pd.read_csv("PIADA_Sem_transição.csv", sep=";")
-			n = file.shape[0]
+			print(self.arquivo_sem_transicao.shape)
+			n = self.arquivo_sem_transicao.shape[0]
 			piada = random.randint(0,n-1)
-			print(file["Piada"][piada])
+			print(self.arquivo_sem_transicao.iloc[piada][0])
+			self.current_state = self.feliz
+			
+	@prime
+	def _create_piada_pergunta_e_resposta(self):
+		while True:
+			msg = yield
+			print(self.arquivo_pergunta_e_resposta.shape)
+			n = self.arquivo_pergunta_e_resposta.shape[0]
+			piada = random.randint(0,n-1)
+			print(self.arquivo_pergunta_e_resposta.iloc[piada][0])
+
+			msg = yield
+			if (msg == 2):
+				print(self.arquivo_pergunta_e_resposta.iloc[piada][1])
+				self.current_state = self.feliz
+			elif (msg == 5):
+				#tentar fazer em PLN
+				self.current_state = self.feliz
+			elif (msg == 7):
+				self.current_state = self.bravo
 			
 
+	@prime
+	def _create_piada(self):
+		while True:
+			msg = yield
+			n = random.randint(1,3)
+			print(n)
+
+			if(n == 1):
+				self.current_state = self.piada_pergunta_e_resposta
+			elif(n == 2):
+				self.current_state = self.piada_simples
+			else:
+				self.current_state = self.piada_toc_toc
+
+			self.current_state[0].send(0)
+	
+	@prime
+	def _create_piada_toc_toc(self):
+		while True:
+			msg = yield
+
+			n = self.arquivo_toc_toc.shape[0]
+			piada = random.randint(0,n-1)
+			print(self.arquivo_toc_toc.iloc[piada][0])
+			msg = yield
+			if (msg == 1):
+				print(self.arquivo_toc_toc.iloc[piada][2])
+				msg = yield
+				print(self.arquivo_toc_toc.iloc[piada][4])
+				self.current_state = self.feliz
+			elif (msg == 2):
+				self.current_state = self.bravo
 
 		
 
