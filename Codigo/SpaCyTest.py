@@ -32,15 +32,14 @@ def make_docs(data):
     
     returns: List(spacy.Doc.doc)
     """
-    
     docs = []
 
     # nlp.pipe([texts]) is way faster than running nlp(text) for each text
     # as_tuples allows us to pass in a tuple, the first one is treated as text
     # the second one will get returned as it is.
     
-    for doc, label in tqdm(nlp.pipe(data, as_tuples=True), total = len(data)):
-        
+    #for doc, label in tqdm(nlp.pipe(data, as_tuples=True), total = len(data)):
+    for doc, label in nlp.pipe(data, as_tuples=True):
         # we need to set the (text)cat(egory) for each document
         doc.cats["positive"] = label
         
