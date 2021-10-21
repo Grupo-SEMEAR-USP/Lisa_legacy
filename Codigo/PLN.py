@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from spacy.language import Language
 from spacy_langdetect  import LanguageDetector
 
-import srsly
+import json
 import typer
 import warnings
 from pathlib import Path
@@ -38,15 +38,18 @@ stop_words = STOP_WORDS
 	lematização
 	remoção de stop words """
 def preprocessamento(texto):
-	texto = texto.lower()
+	texto = texto.lower()		#Deixa texto somente com minúsculas
 	documento = nlp(texto)
 
 	lista = []
-	for token in documento:
+	for token in documento:	#Lematiza todas as palavras do banco de dados (não é muito preciso)
 		#lista.append(token.text)
 		lista.append(token.lemma_)
 
+	#Tira stop words e pontuação
 	lista = [palavra for palavra in lista if palavra not in stop_words and palavra not in pontuacoes]
+
+	#Junta todos os elementos da lista em 1 string e add epaço entre os elementos
 	lista = ' '.join([str(elemento) for elemento in lista if not elemento.isdigit()])
 
 	return lista
@@ -56,59 +59,61 @@ baseDeDados['texto'] = baseDeDados['texto'].apply(preprocessamento)
 baseDeDadosFinal = []
 db = DocBin()
 
+arq = open("db.json", "w", encoding='utf8')
+
 #criação do dicionário
 for texto, Comando in zip(baseDeDados['texto'],baseDeDados['Comando']):
 
 	if Comando == 'Acordar':
-		dic = ({'ACORDAR': 1.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 1.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Dormir':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 1.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 1.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Girar':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 1.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 1.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Levantar braços':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 1.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 1.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Piada':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 1.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 1.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Falar o nome':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 1.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Está bem':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 1.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Apresentar':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 1.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Falar sobre SEMEAR':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 1.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Falar sobre ADA':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 1.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Música':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 1.0, 'SOLETRAR': 0.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Soletrar':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 1.0, 'DANÇAR': 0.0 })
 	elif Comando == 'Dançar':
-		dic = ({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
+		dic = dict({'ACORDAR': 0.0, 'DORMIR': 0.0, 'GIRAR': 0.0, 'LEVANTAR BRAÇOS': 0.0, 'PIADA': 0.0, 
 		'FALAR O NOME': 0.0, 'ESTÁ BEM': 0.0, 'APRESENTAR': 0.0,'FALAR SOBRE SEMEAR': 0.0, 
 		'FALAR SOBRE ADA': 0.0, 'MÚSICA': 0.0, 'SOLETRAR': 0.0, 'DANÇAR': 1.0 })
 
@@ -116,6 +121,15 @@ for texto, Comando in zip(baseDeDados['texto'],baseDeDados['Comando']):
 	doc.cats = dic.copy()
 	db.add(doc)
 
+	arq.write("{\"text\":\"" + texto + "\",\"cats\":")
+	arq.write(json.dumps(dic,ensure_ascii=False))
+	arq.write("}\n")
+
+	#print(doc.cats)
+
 	#baseDeDadosFinal.append([texto, dic.copy()])
 
+arq.close()
 db.to_disk("db")
+
+#python -m spacy train config.conf --output training/ --paths.train db --paths.dev db --nlp.lang "pt" --gpu-id -1
