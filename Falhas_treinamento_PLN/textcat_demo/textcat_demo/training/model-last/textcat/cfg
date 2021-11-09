@@ -1,0 +1,19 @@
+{
+  "labels":[
+    "ACORDAR",
+    "DORMIR",
+    "GIRAR",
+    "LEVANTAR BRA\u00c7OS",
+    "PIADA",
+    "FALAR O NOME",
+    "EST\u00c1 BEM",
+    "APRESENTAR",
+    "FALAR SOBRE SEMEAR",
+    "FALAR SOBRE ADA",
+    "M\u00daSICA",
+    "SOLETRAR",
+    "DAN\u00c7AR"
+  ],
+  "threshold":0.5,
+  "positive_label":null
+}
