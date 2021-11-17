@@ -18,7 +18,7 @@ Alguns comentários foram adicionados aos desenhos, para facilitar compreensão 
 ## Membros
 - Érika Hortência
 - Breno Seixas
-- Emanuela Porto
+- Manuella Porto
 - Gabriela Barion Vidal
 - Rodrigo Bragato Piva
 - Tsuyoshi Sonobe
