@@ -22,7 +22,7 @@ Alguns comentários foram adicionados aos desenhos, para facilitar compreensão 
 - Gabriela Barion Vidal
 - Rodrigo Bragato Piva 
 - Tsuyoshi Sonobe (Yoshi)
-- 
+
 ## Membros (que entraram em 2021)
 - Beatriz Aimée 
 - Eduarda Sproesser (β)
