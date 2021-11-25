@@ -1,5 +1,5 @@
-# SEMEADA
-Projeto realizado em parceria com o grupo SEMEAR com o objetivo de construir um robô de mesa que se comunique com as pessoas, respondendo a perguntas, contando piadas e se movimentando
+# SEMEAR
+Projeto realizado em parceria com o grupo ADA com o objetivo de construir um robô de mesa que se comunique com as pessoas, respondendo a perguntas, contando piadas e se movimentando
 
 ## Tecnologias Usadas
 
@@ -15,13 +15,23 @@ Alguns comentários foram adicionados aos desenhos, para facilitar compreensão 
 
 ![Máquina de Estados - Tocar Música](https://github.com/ADA-EC/SEMEADA/blob/main/Maquina_Estados/Tocar_musica.png)
 
-## Membros
+## Membros (que entraram em 2020)
 - Érika Hortência
-- Breno Seixas
-- Manuella Porto
+- Breno Seixas (Trovs)
+- Manuella Porto 
 - Gabriela Barion Vidal
-- Rodrigo Bragato Piva
-- Tsuyoshi Sonobe
+- Rodrigo Bragato Piva 
+- Tsuyoshi Sonobe (Yoshi)
+- 
+## Membros (que entraram em 2021)
+- Beatriz Aimée 
+- Eduarda Sproesser (β)
+- Gianluca Capezzuto
+- Giovanna Tormena (Mãe)
+- Lucas Pulcinelli (Harvs)
+- Lucas Fiorotti (Fiotty)
+- Matheus Maquera (Cabo)
+
 
 ## Agradecimentos
 - Victor Amaral
