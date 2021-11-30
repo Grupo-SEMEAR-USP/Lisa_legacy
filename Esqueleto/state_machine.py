@@ -28,6 +28,7 @@ class MaqEstados:
 		self.piada_pergunta_e_resposta = (self._create_piada_pergunta_e_resposta(), "Piada pergunta e resposta")
 		self.piada_toc_toc = (self._create_piada_toc_toc(), "Piada sem toc toc")
 		self.piada = (self._create_piada(), "Piada")
+		self.tocar_musica = (self._create_tocar_musica(), "Tocar musica")
 		
 		# setting current state of the system
 		self.current_state = self.neutro
@@ -121,6 +122,10 @@ class MaqEstados:
 			elif msg == comando.Piada:
 				self.current_state = self.piada
 				self.current_state[0].send(0)
+			elif msg == comando.Musica:
+				print("-> Escolhendo musica para tocar\n")
+				#Parte do código para escolher a musica que irar tocar
+				self.current_state = self.tocar_musica
 			else:
 				# Qualquer outra coisa ele dorme
 				print('Vou dormir\n')
@@ -164,6 +169,10 @@ class MaqEstados:
 			elif msg == comando.Piada:
 				self.current_state = self.piada
 				self.current_state[0].send(0)
+			elif msg == comando.Musica:
+				print("-> Escolhendo musica para tocar\n")
+				#Parte do código para escolher a musica que irar tocar
+				self.current_state = self.tocar_musica
 
 			self.previous_state = self.bravo
 
@@ -202,6 +211,10 @@ class MaqEstados:
 			elif msg == comando.Piada:
 				self.current_state = self.piada
 				self.current_state[0].send(0)
+			elif msg == comando.Musica:
+				print("-> Escolhendo musica para tocar\n")
+				#Parte do código para escolher a musica que irar tocar
+				self.current_state = self.tocar_musica
 				
 			self.previous_state = self.triste
 
@@ -244,6 +257,10 @@ class MaqEstados:
 			elif msg == comando.Piada:
 				self.current_state = self.piada
 				self.current_state[0].send(0)
+			elif msg == comando.Musica:
+				print("-> Escolhendo musica para tocar\n")
+				#Parte do código para escolher a musica que irar tocar
+				self.current_state = self.tocar_musica
 				
 			self.previous_state = self.feliz
 	
@@ -310,6 +327,7 @@ class MaqEstados:
 				print("-> Dormindo\n")
 				
 			self.previous_state = self.dormindo
+
 	@prime
 	def _create_soletrando(self):
 		while True:
@@ -470,7 +488,6 @@ class MaqEstados:
 			elif (msg == 7):
 				self.current_state = self.bravo
 			
-
 	@prime
 	def _create_piada(self):
 		while True:
@@ -504,6 +521,24 @@ class MaqEstados:
 			elif (msg == 2):
 				self.current_state = self.bravo
 
+	@prime
+	def _create_tocar_musica(self):
+		while True:
+			msg = yield
+
+			if msg == comando.Stop:
+				print('Ok!')
+				#Chance dessa parte do código mudar por conta da máquina de estados que pensamos originalmente
+				#Rever trecho do código após definir como serão armazenadas as músicas
+				if(random.randint(1,10) < 2):	#Chance do robô voltar à emoção antiga
+					self.current_state = self.previous_state
+					print("->", self.previous_state[1],"\n")
+				else:
+					self.current_state = self.feliz
+					print("Eu amo essa música!!\n")
+					print("-> Feliz\n")
+					
+			self.previous_state = self.tocar_musica
 		
 
 
