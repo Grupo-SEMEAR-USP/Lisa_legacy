@@ -40,11 +40,8 @@ class MaqEstados:
 
 		# open jokes file
 		self.arquivo_pergunta_e_resposta = pd.read_csv("PIADA_Pergunta_e_Resposta.tsv", sep="	")
-		print(self.arquivo_pergunta_e_resposta)
 		self.arquivo_sem_transicao = pd.read_csv("PIADA_Sem_transição.tsv", sep="	")
-		print(self.arquivo_sem_transicao)
 		self.arquivo_toc_toc = pd.read_csv("PIADA_Toc_toc.tsv", sep="	")
-		print(self.arquivo_toc_toc)
 
 	def send(self, msg):
 		"""The function sends the current input to the current state
