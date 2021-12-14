@@ -1,8 +1,3 @@
-"""Create a recording with arbitrary duration.
-
-The soundfile module (https://PySoundFile.readthedocs.io/) has to be installed!
-
-"""
 import threading
 import argparse
 import tempfile
@@ -36,7 +31,7 @@ def callback(indata, frames, time, status):
 	q.put(indata.copy())
 
 
-def threadRecord(filename, device, samplerate, channels, subtype):
+def threadRecord(filename, device = 1, samplerate = 44100, channels = 1, subtype = 'PCM_16'):
 	t = threading.currentThread()
 
 	if samplerate is None:

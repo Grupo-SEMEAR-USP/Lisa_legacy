@@ -1,3 +1,7 @@
+'''
+	Função de fala do robô
+'''
+
 import speech_recognition as sr
 import mmap
 import time
@@ -13,20 +17,26 @@ from pydub.playback import play
 def speak(text):
 	print(os.getcwd())
 	tts = gTTS(text=text, lang="pt")
-	filename = "./voice.mp3"
+	
+	filename = 'voice.mp3'
+	
 	tts.save(filename)
 	
 	path = os.getcwd()+"\\"+filename
+
 	# path.replace('\\','\\\\')
 
 
-	with open(path) as f:
-		song = AudioSegment.from_file(f, format="mp3")
-		play(song)
+	# with open(path) as f:
+	# 	song = AudioSegment.from_file(f, format="mp3")
+	# 	play(song)
 
 	# mp3 = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) 
 
-	# playsound(mp3)
+	playsound(filename)
+
+	os.remove(filename)
+
 	# mixer.init()
 	# mixer.music.load(mp3)
 	# mixer.music.play()

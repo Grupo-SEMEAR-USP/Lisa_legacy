@@ -9,8 +9,6 @@ from spacy.lang.pt.stop_words import STOP_WORDS
 import spacy
 
 
-
-
 def main():
 	pln_tokenizer = spacy.load("pt_core_news_sm")
 	pln_tokenizer.Defaults.stop_words.remove("estar")
@@ -27,9 +25,10 @@ def main():
 		msg = input('Mensagem: ')
 
 		if(msg == 'Ouvir'):
-			texto = processamento_voz.get_audio()
+			texto = processamento_voz.get_audio("audio.wav")
 			sintese_voz.speak(texto)
-			PLN.pln(texto, nlp, stop_words, pln_tokenizer)
+			numComando = PLN.pln(texto, nlp, stop_words, pln_tokenizer)
+			robo.send(str(numComando))
 		else:
 			robo.send(msg)
 
