@@ -1,0 +1,124 @@
+{
+  "lang":"pt",
+  "name":"pipeline",
+  "version":"0.0.0",
+  "spacy_version":">=3.1.2,<3.2.0",
+  "description":"",
+  "author":"",
+  "email":"",
+  "url":"",
+  "license":"",
+  "spacy_git_version":"e1f88de72",
+  "vectors":{
+    "width":0,
+    "vectors":0,
+    "keys":0,
+    "name":null
+  },
+  "labels":{
+    "textcat":[
+      "ACORDAR",
+      "DORMIR",
+      "GIRAR",
+      "LEVANTAR BRA\u00c7OS",
+      "PIADA",
+      "FALAR O NOME",
+      "EST\u00c1 BEM",
+      "APRESENTAR",
+      "FALAR SOBRE SEMEAR",
+      "FALAR SOBRE ADA",
+      "M\u00daSICA",
+      "SOLETRAR",
+      "DAN\u00c7AR"
+    ]
+  },
+  "pipeline":[
+    "textcat"
+  ],
+  "components":[
+    "textcat"
+  ],
+  "disabled":[
+
+  ],
+  "performance":{
+    "cats_score":0.9896856583,
+    "cats_score_desc":"macro F",
+    "cats_micro_p":0.990442055,
+    "cats_micro_r":0.990442055,
+    "cats_micro_f":0.990442055,
+    "cats_macro_p":0.9893579902,
+    "cats_macro_r":0.9901819157,
+    "cats_macro_f":0.9896856583,
+    "cats_macro_auc":0.9999277812,
+    "cats_f_per_type":{
+      "ACORDAR":{
+        "p":1.0,
+        "r":0.9770114943,
+        "f":0.988372093
+      },
+      "DORMIR":{
+        "p":0.9893617021,
+        "r":1.0,
+        "f":0.9946524064
+      },
+      "GIRAR":{
+        "p":0.98,
+        "r":1.0,
+        "f":0.9898989899
+      },
+      "LEVANTAR BRA\u00c7OS":{
+        "p":1.0,
+        "r":1.0,
+        "f":1.0
+      },
+      "PIADA":{
+        "p":0.9661016949,
+        "r":1.0,
+        "f":0.9827586207
+      },
+      "FALAR O NOME":{
+        "p":0.9761904762,
+        "r":0.9761904762,
+        "f":0.9761904762
+      },
+      "EST\u00c1 BEM":{
+        "p":1.0,
+        "r":1.0,
+        "f":1.0
+      },
+      "APRESENTAR":{
+        "p":0.95,
+        "r":0.9743589744,
+        "f":0.9620253165
+      },
+      "FALAR SOBRE SEMEAR":{
+        "p":1.0,
+        "r":1.0,
+        "f":1.0
+      },
+      "FALAR SOBRE ADA":{
+        "p":1.0,
+        "r":1.0,
+        "f":1.0
+      },
+      "M\u00daSICA":{
+        "p":1.0,
+        "r":0.972972973,
+        "f":0.9863013699
+      },
+      "SOLETRAR":{
+        "p":1.0,
+        "r":1.0,
+        "f":1.0
+      },
+      "DAN\u00c7AR":{
+        "p":1.0,
+        "r":0.9718309859,
+        "f":0.9857142857
+      }
+    },
+    "cats_macro_auc_per_type":0.0,
+    "textcat_loss":0.0001518582
+  }
+}
