@@ -28,7 +28,7 @@ def preprocessamento(texto):
 
 text = "Como voce está?"     #Digitar o comando para testar o modelo
 
-nlp = spacy.load(".\\textcat_demo\\textcat_demo\\training\\model-last")
+nlp = spacy.load("training\\model-last")
 
 doc = nlp(preprocessamento(text))
 
