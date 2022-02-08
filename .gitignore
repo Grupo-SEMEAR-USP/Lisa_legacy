@@ -1,1 +1,24 @@
-.vscode/launch.json
+#todos os arquivos . são ignorados (ex .vscode)
+.*
+!.gitignore
+
+#pycache deve ser local
+__pycache__
+
+#virtual environments também são locais
+venv
+
+#arquivos de áudio de teste devem ser locais
+*.mp3
+*.wav
+
+#modelos de treino não demoram o suficiente para serem treinados a ponto de
+#precisarem ser compartilhados, deixa a tree <bem> mais limpa
+training
+model-last
+model-best
+
+#arquivos relacionados ao treinamento do spacy também podem ser ignorados
+*.spacy
+project.lock
+db.json
