@@ -13,7 +13,7 @@ def main():
 	pln_tokenizer = spacy.load("pt_core_news_sm")
 	pln_tokenizer.Defaults.stop_words.remove("estar")
 	stop_words = STOP_WORDS
-	nlp = spacy.load(".\\model-last")
+	nlp = spacy.load("./model-last")
 
 	robo = state_machine.MaqEstados()
 	print("criado")

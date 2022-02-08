@@ -69,7 +69,7 @@ def Record(filename, device, samplerate, channels, subtype):
 	thread.do_run = False
 	time.sleep(1)
 
-def get_audio(filename, device = 1, samplerate = 44100, channels = 1, subtype = 'PCM_16'):
+def get_audio(filename, device = sd.default.device, samplerate = 44100, channels = 1, subtype = 'PCM_16'):
 	Record(filename, device, samplerate, channels, subtype)
 
 	r = sr.Recognizer()

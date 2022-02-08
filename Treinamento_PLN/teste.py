@@ -23,12 +23,13 @@ def preprocessamento(texto):
 
 	#Junta todos os elementos da lista em 1 string e add epaço entre os elementos
 	lista = ' '.join([str(elemento) for elemento in lista if not elemento.isdigit()])
-	
+
 	return lista
 
 text = "Como voce está?"     #Digitar o comando para testar o modelo
 
-nlp = spacy.load("training\\model-last")
+nlp = spacy.load("training/model-last")
+
 
 doc = nlp(preprocessamento(text))
 
