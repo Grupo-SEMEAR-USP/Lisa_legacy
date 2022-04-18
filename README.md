@@ -1,5 +1,5 @@
-# SEMEAR
-Projeto realizado em parceria com o grupo ADA com o objetivo de construir um robô de mesa que se comunique com as pessoas, respondendo a perguntas, contando piadas e se movimentando
+# Lisa
+A Lisa é uma robô humanóide construída do zero pelo grupo SEMEAR EESC/USP, com o objetivo de ser um robô capaz de interagir com pessoas por meio de voz, movimentos de braços e torso, uma tela que representa seus olhos, entre outros. A Lisa pode ser utilizada no contexto de extensão, como em um robô de companhia, por exemplo, além de ser um projeto ideal para o estudo de robótica e programação por estudantes, isso pela extensa documentação disponível.
 
 ## Tecnologias Usadas
 
@@ -15,23 +15,4 @@ Alguns comentários foram adicionados aos desenhos, para facilitar compreensão 
 
 ![Máquina de Estados - Tocar Música](Arquivos_readme/Tocar_musica.png)
 
-## Membros (que entraram em 2020)
-- Érika Hortência
-- Breno Seixas (Trovs)
-- Manuella Porto
-- Gabriela Barion Vidal
-- Rodrigo Bragato Piva
-- Tsuyoshi Sonobe (Yoshi)
 
-## Membros (que entraram em 2021)
-- Beatriz Aimée
-- Eduarda Sproesser (β)
-- Gianluca Capezzuto
-- Giovanna Tormena (Mãe)
-- Lucas Pulcinelli (Harvs)
-- Lucas Fiorotti (Fiotty)
-- Matheus Maquera (Cabo)
-
-
-## Agradecimentos
-- Victor Amaral
