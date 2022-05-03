@@ -2,6 +2,9 @@
 .*
 !.gitignore
 
+#todos os arquivos executáveis compilados não devem ir para o repositório
+build
+
 #pycache deve ser local
 __pycache__
 
