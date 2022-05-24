@@ -15,12 +15,12 @@ if __name__ == "__main__":
     import playsound
     import os
 
-    gen_audio = gerarStreamAudio("Oi! Eu sou a Lisa")
+    gerador = gerarStreamAudio("Oi! Eu sou a Lisa")
     
-    f = open("exemplo.mp3", "wb")
-    for s in gen_audio():
-        f.write(s)
-    f.close()
+    arq = open("exemplo.mp3", "wb")
+    for s in gerador():
+        arq.write(s)
+    arq.close()
 
     playsound.playsound("exemplo.mp3")
     os.remove("exemplo.mp3")

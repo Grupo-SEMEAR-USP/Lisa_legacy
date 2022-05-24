@@ -5,17 +5,21 @@ import speech_recognition as sr
 
 
 def reconhecerAudio(audio, sample_rate=44100, sample_width=2):
-    recognizer = sr.Recognizer()
+    rec = sr.Recognizer()
 
-    arq = sr.AudioData(audio, sample_rate, sample_width)
+    audiodata = sr.AudioData(audio, sample_rate, sample_width)
     
-    texto = recognizer.recognize_google(arq, language="pt-BR")
+    texto = rec.recognize_google(audiodata, language="pt-BR")
     return texto
 
 
 if __name__ == "__main__":
     from sys import path
     from os.path import join, dirname, realpath
+
+    #adiciona o caminho da função de gravar áudio, feito somente para
+    #reutilizar código na situação de debugging,
+    #não é uma prática boa fora desse contexto!
     path.append(join(dirname(realpath(__file__)), "../Cliente"))
 
     from gravarAudio import gravarAudioArquivo
