@@ -15,3 +15,4 @@ sounddevice
 soundfile
 streamlit
 spacy_streamlit
+flask
