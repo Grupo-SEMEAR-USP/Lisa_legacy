@@ -1,6 +1,7 @@
 from comandos import comando
 import random
 import pandas as pd
+from os.path import join
 
 def prime(fn):
 	def wrapper(*args, **kwargs):
@@ -39,9 +40,9 @@ class MaqEstados:
 		self.Stopped = False
 
 		# open jokes file
-		self.arquivo_pergunta_e_resposta = pd.read_csv("PIADA_Pergunta_e_Resposta.tsv", sep="	")
-		self.arquivo_sem_transicao = pd.read_csv("PIADA_Sem_transição.tsv", sep="	")
-		self.arquivo_toc_toc = pd.read_csv("PIADA_Toc_toc.tsv", sep="	")
+		self.arquivo_pergunta_e_resposta = pd.read_csv(join("res", "piadas", "PIADA_Pergunta_e_Resposta.tsv"), sep="	")
+		self.arquivo_sem_transicao = pd.read_csv(join("res", "piadas", "PIADA_Sem_transição.tsv"), sep="	")
+		self.arquivo_toc_toc = pd.read_csv(join("res", "piadas", "PIADA_Toc_toc.tsv"), sep="	")
 
 	def send(self, msg):
 		"""The function sends the current input to the current state
