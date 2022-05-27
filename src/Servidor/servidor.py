@@ -64,7 +64,7 @@ def paraTexto():
     return flask.Response(texto, mimetype="text/plain")
 
 
-@servidor.route("/responder/<uid>", methods=["GET"])
+@servidor.route("/responder/<uid>", methods=["POST"])
 def responder(uid):
     '''
     A função responder retorna o áudio de TTS com a resposta da Lisa da 
