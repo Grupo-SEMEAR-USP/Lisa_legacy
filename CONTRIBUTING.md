@@ -33,7 +33,7 @@ class Objeto:
     A classe objeto representa um ser não vivo genérico.
     Essa classe contém apenas duas propriedades: nome e dimensoes,
     no qual o nome é uma string com o nome e dimensoes é uma lista contendo o
-    tamanho em X, Y, e Z em metros cúbicos, respectivamente.
+    tamanho em X, Y, e Z em metros, respectivamente.
     '''
 
     def __init__(self, nome, dimensoes):

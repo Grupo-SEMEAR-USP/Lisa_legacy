@@ -1,4 +1,4 @@
-#Contribuidores
+# Contribuidores
 Neste arquivo citamos os contribuidores que possibilitaram a existência desse projeto, sendo eles tanto os do grupo SEMEAR quanto os contribuidores externos notáveis
 
 ## Membros do SEMEAR
