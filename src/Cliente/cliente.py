@@ -77,7 +77,7 @@ class ClienteLisa:
         if self.debug:
             print(f"falando áudio de tamanho {len(audio)//1024} kb")
         
-        nome_arquivo = "tmp"
+        nome_arquivo = "tmp.wav"
         arq = open(nome_arquivo, "wb")
         arq.write(audio)
         arq.close()
@@ -128,14 +128,14 @@ if __name__ == "__main__":
     try:
         while True:
             lido = input("input: ")
-            index_comando = lido.find(" ")
-            if len(lido) == 0:
+            try:
+                comando = lido.split()[0]
+            except IndexError:
                 break
-
-            comando = lido[:index_comando]
                 
             if comando == "paraAudio":
-                audio = lisa.paraAudio(lido[index_comando:])
+                texto = lido[lido.find(comando)+len(comando)+1:]
+                audio = lisa.paraAudio(texto)
                 lisa.falar(audio)
             elif comando == "paraTexto":
                 texto = lisa.paraTexto(None)
@@ -146,7 +146,8 @@ if __name__ == "__main__":
                 os.remove("tmp.wav")
                 lisa.falar(audio)
             elif comando == "responderTexto":
-                audio = lisa.responder(lido[index_comando:])
+                texto = lido[lido.find(comando)+len(comando)+1:]
+                audio = lisa.responder(texto)
                 lisa.falar(audio)
             else:
                 print("Erro, input invalido")
