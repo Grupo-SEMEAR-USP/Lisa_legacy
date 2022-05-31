@@ -152,7 +152,5 @@ if __name__ == "__main__":
             else:
                 print("Erro, input invalido")
 
-    except EOFError:
-        pass
-    except KeyboardInterrupt:
+    except (EOFError, KeyboardInterrupt):
         pass

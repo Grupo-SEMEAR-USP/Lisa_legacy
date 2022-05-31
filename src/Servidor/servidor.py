@@ -3,6 +3,7 @@ import flask
 from TTSLisa import gerarStreamAudio
 from reconhecimentoSentido import gerarResposta, criarLisa
 from reconhecimentoAudio import reconhecerAudio
+from speech_recognition import UnknownValueError
 
 
 #TODO:  tornar isso um REST api, se for possível
@@ -36,7 +37,6 @@ def paraAudio():
     #pega o texto todo como uma string
     texto = flask.request.get_data().decode("utf-8")
 
-    gerador = None
     try:
         gerador = gerarStreamAudio(texto)
     except AssertionError:
@@ -79,27 +79,27 @@ def responder(uid):
         return flask.Response("Bad uid", status=400)
 
     content_type = flask.request.content_type
-
-    texto_in = None
     
+
     #são aceitos tanto texto quanto áudio, agindo apropriadamente para cada um 
     #e reconhecendo o tipo de input via o header de http "content-type",
     #também conhecido como "mimetype"
     if content_type == "text/plain":
         texto_in = flask.request.get_data().decode("utf-8")
     elif content_type == "audio/wav":
-        texto_in = reconhecerAudio(flask.request.get_data())
+        try:
+            texto_in = reconhecerAudio(flask.request.get_data())
+        except UnknownValueError:
+            texto_in = None
     else:
         return flask.Response(status=400)
     
-    texto_out = None
     try:
         texto_out = gerarResposta(uid, texto_in)
     except KeyError:
         #se essa Lisa não existe, retorna que não encontrada
         return flask.Response(status=404)
     
-    gerador = None
     try:
         gerador = gerarStreamAudio(texto_out)
     except AssertionError:
