@@ -59,7 +59,11 @@ def paraTexto():
         return flask.Response(status=400)
     
     audio = flask.request.get_data()
-    texto = reconhecerAudio(audio)
+
+    try:
+        texto = reconhecerAudio(audio)
+    except UnknownValueError:
+        return flask.Response("No text to Speak", status=400)
 
     return flask.Response(texto, mimetype="text/plain")
 
