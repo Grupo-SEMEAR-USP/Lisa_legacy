@@ -18,8 +18,12 @@ def registrar():
     A função registrar registra uma nova instância de Lisa, 
     retornando um valor do ID do cliente.
     '''
+
+    try:
+        uid = criarLisa()
+    except OverflowError:
+        flask.Response("Lisas demais", status=507)
     
-    uid = criarLisa()
     return flask.Response(status=201, headers={"uid":str(uid)})
 
 

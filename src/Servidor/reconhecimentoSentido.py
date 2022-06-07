@@ -6,14 +6,22 @@ import random
 
 
 class Lisa:
-    def __init__(self):
-        self.uid = random.randint(0, 256)
+    def __init__(self, uid):
+        self.uid = uid
 
 lisas = {}
 
 def criarLisa():
+    if len(lisas) > 256:
+        raise OverflowError("Lisas demais")
 
-    nova_lisa = Lisa()    
+    uid = random.randint(0, 2**32-1)
+    
+    #ineficiente 
+    while uid in lisas.keys():
+        uid = random.randint(0, 2**32-1)
+
+    nova_lisa = Lisa(uid)
 
     lisas[nova_lisa.uid] = nova_lisa
     return nova_lisa.uid
