@@ -17,27 +17,32 @@ class ClienteLisa:
             print("Criando Lisa...")
         resposta = self.enviarHTTP(urljoin(self.url, "registrar"))
 
-        self.uid = resposta.headers["uid"]
+        self.uid = resposta.content.decode("utf-8")
         if self.debug:
             print(f"Lisa criada, uid {self.uid}")
 
     def __del__(self):
         if self.debug:
-            print(f"\n\ndeletando Lisa")
-            print(f"informação transferida:", end=" ")
+            print(f"\n\ninformação transferida:", end=" ")
             print(f"{self.informacao_transferida/1024**2} Mb")
     
-    def paraAudio(self, texto):
+    def responderTexto(self, texto, compreender: bool=True):
         if self.debug:
-            print("enviando para_audio")
-        resposta = self.enviarHTTP(urljoin(self.url, "para_audio"), texto, 
-            headers={"content-type": "text/plain"})
+            print("enviando responder texto")
+        
+        url_pedido = urljoin(self.url, self.uid) + "/"
+        url_pedido = urljoin(url_pedido, "responder")
 
-        return resposta.content
+        resposta = self.enviarHTTP(url_pedido, texto, headers={
+            "content-type": "text/plain", 
+            "compreender": "true" if compreender else "false"
+        })
 
-    def paraTexto(self, nome_arquivo=None):
+        return resposta.content.decode("utf-8")
+
+    def responderAudio(self, nome_arquivo=None, compreender=True):
         if self.debug:
-            print(f"enviando para_texto")
+            print(f"enviando responder texto")
 
         gravar_arquivo = nome_arquivo is None
         if gravar_arquivo:
@@ -46,32 +51,32 @@ class ClienteLisa:
         
         arq = open(nome_arquivo, "rb")
             
-        resposta = self.enviarHTTP(urljoin(self.url, "para_texto"), arq, 
-            headers={"content-type": "audio/wav"})
+
+        url_pedido = urljoin(self.url, self.uid) + "/"
+        url_pedido = urljoin(url_pedido, "responder")
+
+        resposta = self.enviarHTTP(url_pedido, arq, headers={
+            "content-type": "audio/wav", 
+            "compreender": "true" if compreender else "false"
+        })
 
         arq.close()
         
         if gravar_arquivo:
             os.remove(nome_arquivo)
 
-        return resposta.content
+        return resposta.content.decode("utf-8")
     
-    def responder(self, entrada, arquivo=False):
-        if self.debug:
-            print(f"enviando responder em {'audio' if arquivo else 'texto'}")
-
-        mimetype = "text/plain" if not arquivo else "audio/wav"
-
-        conteudo = open(entrada, "rb") if arquivo else entrada
-
-
-        resposta = self.enviarHTTP(urljoin(self.url, f"responder/{self.uid}"),
-            conteudo, headers={"content-type": mimetype})
+    def pegarResposta(self, indice, audio=False):
+        url_pedido = urljoin(self.url, self.uid) + "/"
+        url_pedido = urljoin(url_pedido, "respostas") + "/"
+        url_pedido = urljoin(url_pedido, indice)
+        resposta = self.enviarHTTP(url_pedido, headers={
+            "accept": "audio/mp3" if audio else "text/plain"
+        }, method="get")
         
-        if arquivo:
-            conteudo.close()
-
         return resposta.content
+
 
     def falar(self, audio):
         if self.debug:
@@ -89,10 +94,15 @@ class ClienteLisa:
             print(f"gravando áudio em {arq}...")
         gravarAudioArquivo(arq)
 
-    def enviarHTTP(self, url, content=None, headers=None):
+    def enviarHTTP(self, url, content=None, headers=None, method="post"):
         t_ini = time.time()
         try:
-            resposta = requests.post(url, content, headers=headers)
+            if method == "post":
+                resposta = requests.post(url, content, headers=headers)
+            elif method == "delete":
+                resposta = requests.delete(url)
+            elif method == "get":
+                resposta = requests.get(url, content, headers=headers)
         except requests.exceptions.ConnectionError:
             print(f"Erro! Não foi possível conectar a {url}")
             sys.exit(1)
@@ -116,8 +126,9 @@ class ClienteLisa:
                 print("-------------")
                 print(resposta.content)
                 print("-------------")
-                sys.exit(1)
-        
+
+        if resposta.status_code >= 400:
+            raise IOError("Retorno incorreto")
         return resposta
             
     
@@ -133,24 +144,33 @@ if __name__ == "__main__":
             except IndexError:
                 break
                 
-            if comando == "paraAudio":
-                texto = lido[lido.find(comando)+len(comando)+1:]
-                audio = lisa.paraAudio(texto)
-                lisa.falar(audio)
-            elif comando == "paraTexto":
-                texto = lisa.paraTexto(None)
-                print(texto)
-            elif comando == "responderAudio":
-                lisa.gravar("tmp.wav")
-                audio = lisa.responder("tmp.wav", True)
-                os.remove("tmp.wav")
-                lisa.falar(audio)
-            elif comando == "responderTexto":
-                texto = lido[lido.find(comando)+len(comando)+1:]
-                audio = lisa.responder(texto)
-                lisa.falar(audio)
-            else:
-                print("Erro, input invalido")
-
+            try:
+                if comando == "enviarAudio":
+                    indice = lisa.responderAudio(None, compreender=False)
+                    print(indice)
+                elif comando == "enviarTexto":
+                    texto = lido[lido.find(comando)+len(comando)+1:]
+                    indice = lisa.responderTexto(texto, compreender=False)
+                    print(indice)
+                elif comando == "responderAudio":
+                    indice = lisa.responderAudio(None)
+                    print(indice)
+                    lisa.falar(audio)
+                elif comando == "responderTexto":
+                    texto = lido[lido.find(comando)+len(comando)+1:]
+                    indice = lisa.responderTexto(texto)
+                    print(indice)
+                elif comando == "pegarTexto":
+                    indice = lido.split()[1]
+                    texto = lisa.pegarResposta(indice, audio=False).decode("utf-8")
+                    print(texto)
+                elif comando == "pegarAudio":
+                    indice = lido.split()[1]
+                    audio = lisa.pegarResposta(indice, audio=True)
+                    lisa.falar(audio)
+                else:
+                    print("Erro, input invalido")
+            except IOError:
+                continue
     except (EOFError, KeyboardInterrupt):
         pass
