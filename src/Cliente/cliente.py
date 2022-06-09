@@ -176,5 +176,9 @@ if __name__ == "__main__":
                     print("Erro, input invalido")
             except IOError:
                 continue
+            except IndexError:
+                print("pegarAudio e pegarTexto precisam de um índice")
+                continue
+        
     except (EOFError, KeyboardInterrupt):
         pass

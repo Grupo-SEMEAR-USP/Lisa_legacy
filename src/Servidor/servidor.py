@@ -35,7 +35,10 @@ def responder(uid):
     
     Caso o header "compreender" esteja presente e tenha valor "false", o texto
     não passará pelo processamento de sentido, sendo apenas copiado para a
-    lista de respostas
+    lista de respostas, feito para debugging do código de comunicação
+
+    É necessário para identificar o tipo de entrada a presença do header
+    "content-type", contendo um de "text/plain" ou "audio/wav"
     '''
     
     #identificando o cliente
@@ -45,7 +48,6 @@ def responder(uid):
         return flask.Response("Lisa não encontrada", status=404)
     except ValueError:
         return flask.Response("Uid não é um número", status=400)
-
 
 
     #identificando o tipo de entrada
@@ -73,24 +75,28 @@ def responder(uid):
 
     #processando a entrada
     try:
-        #identifica o tipo e transforma para texto caso seja um áudio
-        indice_pedido = lisa.adicionarResposta(entrada, compreender)
+        #pede para a Lisa processar essa entrada
+        indice_pedido = lisa.adicionarPedido(entrada, compreender)
     except queue.Full:
         return flask.Response("Muitos pedidos no buffer", status=507)
     except OverflowError:
         return flask.Response("Respostas demais", status=507)
 
-    #retornando que deu tudo certo
+    #retornando o índice que a resposta se encontrará na lista
     return flask.Response(str(indice_pedido))
 
 
 @servidor.route("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
 def resposta(uid, indice):
     '''
-    resposta retorna a resposta em áudio ou texto com um índice específico,
-    ou deleta a resposta caso o metodo seja esse
+    A função resposta retorna a resposta em áudio ou texto com um índice
+    específico, ou deleta a resposta caso o metodo seja esse
+
+    É necessária a presença de um header "accept" que identifica o tipo de dado
+    pedido, sendo um de "text/plain" ou "audio/mp3"
     '''
 
+    #identificando o cliente
     try:
         lisa = Lisa.lisas[int(uid)]
     except KeyError:
@@ -98,6 +104,8 @@ def resposta(uid, indice):
     except ValueError:
         return flask.Response("Uid não é um número", status=400)
 
+
+    #identificando a resposta baseado no índice
     try:
         resposta = lisa.respostas[int(indice)]
     except ValueError:
@@ -106,32 +114,41 @@ def resposta(uid, indice):
         return flask.Response("Indice não está entre 0 e 32", status=400)
 
 
+    #deletando a resposta caso o metodo seja esse
     if flask.request.method == "DELETE":
         lisa.respostas[int(indice)] = None
         return flask.Response(status=200)
 
 
+    #identificando se a resposta está pronta e existe
     if type(resposta) == bool and resposta == False:
         return flask.Response("Resposta não está pronta", status=202)
     if type(resposta) == type(None):
         return flask.Response("Resposta não encontrada", status=404)
     
+
+    #identificando o tipo de dado pedido para retorno
     try:
         tipo_pedido = flask.request.headers["accept"]
     except KeyError:
         return flask.Response("Sem header Accept", status=400)
 
     if tipo_pedido == "text/plain":
+        #retornando o texto da resposta em si
         return flask.Response(resposta)
 
     if tipo_pedido == "audio/mp3":
+        #gerando a stream de áudio de TTS
         try:
             gerador = gerarStreamAudio(resposta)
         except AssertionError:
             return flask.Response("Erro no TTS", status=500)
+        
+        #retornando a stream de áudio
         return servidor.response_class(gerador())
     
-    #se não recebems texto ou wav algo está errado
+
+    #se não recebemos o accept correto retorna que não é suportado
     return flask.Response(status=415)
 
 
