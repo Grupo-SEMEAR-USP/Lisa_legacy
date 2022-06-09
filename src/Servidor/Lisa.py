@@ -9,7 +9,7 @@ class Lisa:
     lisas = {}
 
     def __init__(self):
-        if len(Lisa.lisas) > 256:
+        if len(Lisa.lisas)+1 > 256:
             raise OverflowError("Lisas demais")
 
         self.pedidos   = queue.Queue(32)

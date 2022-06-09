@@ -134,7 +134,11 @@ class ClienteLisa:
     
 
 if __name__ == "__main__":
-    lisa = ClienteLisa("http://localhost:8080", True)
+    try:
+        lisa = ClienteLisa("http://localhost:8080", True)
+    except IOError:
+        print("Erro na criação da cliente")
+        sys.exit(-1)
 
     try:
         while True:

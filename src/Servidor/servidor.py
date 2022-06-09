@@ -21,7 +21,7 @@ def registrar():
     try:
         lisa = Lisa()
     except OverflowError:
-        flask.Response("Lisas demais", status=507)
+        return flask.Response("Lisas demais", status=507)
     
     return flask.Response(str(lisa.uid), status=201)
 
