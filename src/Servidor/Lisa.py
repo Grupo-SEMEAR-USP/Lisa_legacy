@@ -51,9 +51,19 @@ class Lisa:
         O retorno é o índice que a resposta associada ao pedido terá
         '''
 
+        #escolhendo o índice da resposta
         try:
-            indice = next(filter(lambda res: res[1] == None, enumerate(self.respostas)))[0]
+            #cria um gerador que retorna tuples com o índice e resposta
+            enumerador = enumerate(self.respostas)
+            
+            #cria um gerador com apenas as tuples que tem resposta igual a None
+            respostas_none = filter(lambda res: res[1] == None, enumerador)
+            
+            #pega o primeiro Indice
+            indice = next(respostas_none)[0]
+
         except StopIteration:
+            #se não houver nenhum índice com None retorna erro
             raise OverflowError("Respostas demais")
         
         if type(entrada) != str and type(entrada) != bytes:
