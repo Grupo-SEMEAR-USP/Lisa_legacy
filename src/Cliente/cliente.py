@@ -8,6 +8,14 @@ import time
 
 
 class ClienteLisa:
+    '''
+    A classe ClienteLisa é uma classe simples que define uma implementação
+    pouco complexa de um cliente de comunicação, com métodos responderTexto e
+    responderAudio para gerar a resposta da Lisa para um texto ou áudio,
+    pegarResposta e deletarResposta para ver e deletar essas respostas e
+    alguns métodos utilitátios
+    '''
+
     def __init__(self, url_base: str, debug: bool=True):
         self.debug = debug
         self.url = url_base
@@ -15,6 +23,8 @@ class ClienteLisa:
         if self.debug:
             self.informacao_transferida = 0
             print("Criando Lisa...")
+
+        #registra a Lisa e guarda o UID
         resposta = self.enviarHTTP(urljoin(self.url, "registrar"))
 
         self.uid = resposta.content.decode("utf-8")
@@ -27,6 +37,11 @@ class ClienteLisa:
             print(f"{self.informacao_transferida/1024**2} Mb")
     
     def responderTexto(self, texto, compreender: bool=True):
+        '''
+        O método responderTexto envia um pedido em texto para o servidor da
+        Lisa, compreendendo ou apenas copiando a resposta
+        '''
+
         if self.debug:
             print("enviando responder texto")
         
@@ -41,6 +56,12 @@ class ClienteLisa:
         return resposta.content.decode("utf-8")
 
     def responderAudio(self, nome_arquivo=None, compreender=True):
+        '''
+        O método responderAudio faz o mesmo que responderTexto mas para um 
+        áudio, além de gravar um arquivo de áudio temporário do usuário caso
+        não haja nenhum input de áudio prévio
+        '''
+
         if self.debug:
             print(f"enviando responder texto")
 
@@ -68,6 +89,11 @@ class ClienteLisa:
         return resposta.content.decode("utf-8")
     
     def pegarResposta(self, indice, audio=False):
+        '''
+        O método pegarResposta pede a resposta de determinado índice em áudio
+        ou texto, retornando em ambos os casos um objeto bytes
+        '''
+
         url_pedido = urljoin(self.url, self.uid) + "/"
         url_pedido = urljoin(url_pedido, "respostas") + "/"
         url_pedido = urljoin(url_pedido, indice)
@@ -76,9 +102,23 @@ class ClienteLisa:
         }, method="get")
         
         return resposta.content
+    
+    def deletarResposta(self, indice):
+        '''
+        O método deletarResposta deleta a resposta de determinado índice
+        '''
+
+        url_pedido = urljoin(self.url, self.uid) + "/"
+        url_pedido = urljoin(url_pedido, "respostas") + "/"
+        url_pedido = urljoin(url_pedido, indice)
+        resposta = self.enviarHTTP(url_pedido, method="delete")
 
 
     def falar(self, audio):
+        '''
+        O método falar fala um áudio contido em um objeto bytes
+        '''
+        
         if self.debug:
             print(f"falando áudio de tamanho {len(audio)//1024} kb")
         
@@ -90,11 +130,20 @@ class ClienteLisa:
         os.remove(nome_arquivo)
     
     def gravar(self, arq):
+        '''
+        O método gravar grava áudio do usuário em um arquivo arq
+        '''
+
         if self.debug:
             print(f"gravando áudio em {arq}...")
         gravarAudioArquivo(arq)
 
     def enviarHTTP(self, url, content=None, headers=None, method="post"):
+        '''
+        O método enviarHTTP envia um pedido de HTTP de forma uniforme com
+        informações de debug úteis
+        '''
+
         t_ini = time.time()
         try:
             if method == "post":
@@ -124,7 +173,7 @@ class ClienteLisa:
                 print("-------------")
                 print(resposta.headers)
                 print("-------------")
-                print(resposta.content)
+                print(resposta.content.decode("utf-8"))
                 print("-------------")
 
         if resposta.status_code >= 400:
@@ -166,18 +215,23 @@ if __name__ == "__main__":
                     print(indice)
                 elif comando == "pegarTexto":
                     indice = lido.split()[1]
-                    texto = lisa.pegarResposta(indice, audio=False).decode("utf-8")
-                    print(texto)
+                    texto = lisa.pegarResposta(indice, audio=False)
+                    print(texto.decode("utf-8"))
                 elif comando == "pegarAudio":
                     indice = lido.split()[1]
                     audio = lisa.pegarResposta(indice, audio=True)
                     lisa.falar(audio)
+                elif comando == "deletarResposta":
+                    indice = lido.split()[1]
+                    lisa.deletarResposta(indice)
+                    print("ok")
                 else:
                     print("Erro, input invalido")
             except IOError:
                 continue
             except IndexError:
-                print("pegarAudio e pegarTexto precisam de um índice")
+                print("pegarAudio, pegarTexto e deletarResposta", end="")
+                print("precisam de um índice")
                 continue
         
     except (EOFError, KeyboardInterrupt):
