@@ -4,17 +4,21 @@ import queue
 import os
 
 
-def gravarAudioArquivo(file, samplerate=44100, disp=sd.default.device, 
+def gravarAudioArquivo(arq, samplerate=44100, disp=sd.default.device, 
         canais=1):
+    '''
+    A função gravarAudioArquivo grava um áudio do usuário até ele apertar
+    ctrl+C
+    '''
 
     q = queue.Queue()
 
     def pegarAudio(data, *args):
         q.put(data.copy())
 
-    if os.path.exists(file):
-        os.remove(file)
-    arq = sf.SoundFile(file, mode='x', samplerate=samplerate,
+    if os.path.exists(arq):
+        os.remove(arq)
+    arq = sf.SoundFile(arq, mode='x', samplerate=samplerate,
             channels=canais)
 
     with sd.InputStream(samplerate=samplerate, 
