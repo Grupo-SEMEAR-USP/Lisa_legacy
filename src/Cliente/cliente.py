@@ -180,7 +180,23 @@ class ClienteLisa:
             raise IOError("Retorno incorreto")
         return resposta
             
-    
+ajuda = '''
+Inputs possíveis:
+
+enviarAudio: grava e envia um áudio para a Lisa falar
+enviarTexto: envia um texto para a Lisa falar (escrever pela linha de input)
+responderAudio: grava e envia um áudio para a Lisa responder
+responderTexto: envia um texto para a Lisa responder \
+(escrever pela linha de input)
+
+Todos esses inputs retornam um número com o índice da resposta que a Lisa gerou
+Para ver a resposta utilize:
+
+pegarAudio: pede o áudio de TTS da Lisa de um index e fala
+pegarTexto: pede o texto de um index
+
+deletarResposta: deleta a resposta em um index
+'''
 
 if __name__ == "__main__":
     try:
@@ -189,6 +205,8 @@ if __name__ == "__main__":
         print("Erro na criação da cliente")
         sys.exit(-1)
 
+    print("Programa de cliente teste da Lisa")
+    print("Utilize \"ajuda\" para ver os comandos possíveis")
     try:
         while True:
             lido = input("input: ")
@@ -224,6 +242,8 @@ if __name__ == "__main__":
                     indice = lido.split()[1]
                     lisa.deletarResposta(indice)
                     print("ok")
+                elif comando == "ajuda":
+                    print(ajuda)
                 else:
                     print("Erro, input invalido")
             except IOError:
