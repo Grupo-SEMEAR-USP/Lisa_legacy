@@ -208,7 +208,6 @@ if __name__ == "__main__":
                 elif comando == "responderAudio":
                     indice = lisa.responderAudio(None)
                     print(indice)
-                    lisa.falar(audio)
                 elif comando == "responderTexto":
                     texto = lido[lido.find(comando)+len(comando)+1:]
                     indice = lisa.responderTexto(texto)
@@ -230,7 +229,7 @@ if __name__ == "__main__":
             except IOError:
                 continue
             except IndexError:
-                print("pegarAudio, pegarTexto e deletarResposta", end="")
+                print("pegarAudio, pegarTexto e deletarResposta", end=" ")
                 print("precisam de um índice")
                 continue
         
