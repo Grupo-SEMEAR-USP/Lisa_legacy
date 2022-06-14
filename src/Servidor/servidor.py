@@ -1,15 +1,16 @@
 import flask
+import queue
+import structlog
 
 from TTSLisa import gerarStreamAudio
 from reconhecimentoSentido import gerarResposta
 from reconhecimentoAudio import reconhecerAudio
 from speech_recognition import UnknownValueError
 from Lisa import Lisa
-import queue
 
 
-servidor = flask.Flask("servidorLisa")
-
+servidor = flask.Flask("flask")
+logger = structlog.get_logger("servidorLisa")
 
 @servidor.route("/registrar", methods=["POST"])
 def registrar():
