@@ -12,6 +12,22 @@ from Lisa import Lisa
 servidor = flask.Flask("flask")
 logger = structlog.get_logger("servidorLisa")
 
+
+def respostaComLog(mensagem, status, *args):
+    if status < 500:
+        logger.debug(
+            mensagem, status=status, 
+            caminho=flask.request.path,
+            metodo=flask.request.method
+        )
+    else:
+        #como o caminho e método pode ser diretamente manipulado pelo usuário,
+        #não podemos incluir em logs que não sejam de debug por segurança
+        logger.error(mensagem, status=status)
+    
+    return flask.Response(mensagem, status, *args)
+
+
 @servidor.route("/registrar", methods=["POST"])
 def registrar():
     '''
@@ -22,9 +38,9 @@ def registrar():
     try:
         lisa = Lisa()
     except OverflowError:
-        return flask.Response("Lisas demais", status=507)
+        return respostaComLog("Lisas demais", status=507)
     
-    return flask.Response(str(lisa.uid), status=201)
+    return flask.Response(str(lisa.uid))
 
 
 @servidor.route("/<uid>/responder", methods=["POST"])
@@ -46,10 +62,9 @@ def responder(uid):
     try:
         lisa = Lisa.lisas[int(uid)]
     except KeyError:
-        return flask.Response("Lisa não encontrada", status=404)
+        return respostaComLog("Lisa não encontrada", status=404)
     except ValueError:
-        return flask.Response("Uid não é um número", status=400)
-
+        return respostaComLog("Uid não é um número", status=400)
 
     #identificando o tipo de entrada
     if flask.request.content_type == "text/plain":
@@ -57,7 +72,7 @@ def responder(uid):
         try:
             entrada = flask.request.get_data().decode("utf-8")
         except UnicodeDecodeError:
-            return flask.Response("Entrada não é UTF-8", status=400)
+            return respostaComLog("Entrada não é UTF-8", status=400)
 
     elif flask.request.content_type == "audio/wav":
         #pega o áudio todo como uma sequência de bytes
@@ -65,7 +80,7 @@ def responder(uid):
     
     else:
         #se não recebems texto ou wav algo está errado
-        return flask.Response("Tipo de dado não suportado", status=415)
+        return respostaComLog("Tipo de dado não suportado", status=415)
 
 
     #identificando o header de compreensão
@@ -79,9 +94,9 @@ def responder(uid):
         #pede para a Lisa processar essa entrada
         indice_pedido = lisa.adicionarPedido(entrada, compreender)
     except queue.Full:
-        return flask.Response("Muitos pedidos no buffer", status=507)
+        return respostaComLog("Muitos pedidos no buffer", status=507)
     except OverflowError:
-        return flask.Response("Respostas demais", status=507)
+        return respostaComLog("Respostas demais", status=507)
 
     #retornando o índice que a resposta se encontrará na lista
     return flask.Response(str(indice_pedido))
@@ -101,18 +116,18 @@ def resposta(uid, indice):
     try:
         lisa = Lisa.lisas[int(uid)]
     except KeyError:
-        return flask.Response("Lisa não encontrada", status=404)
+        return respostaComLog("Lisa não encontrada", status=404)
     except ValueError:
-        return flask.Response("Uid não é um número", status=400)
+        return respostaComLog("Uid não é um número", status=400)
 
 
     #identificando a resposta baseado no índice
     try:
         resposta = lisa.respostas[int(indice)]
     except ValueError:
-        return flask.Response("Indice não é um número", status=400)
+        return respostaComLog("Indice não é um número", status=400)
     except KeyError:
-        return flask.Response("Indice não está entre 0 e 32", status=400)
+        return respostaComLog("Indice não está entre 0 e 32", status=400)
 
 
     #deletando a resposta caso o metodo seja esse
@@ -123,16 +138,16 @@ def resposta(uid, indice):
 
     #identificando se a resposta está pronta e existe
     if type(resposta) == bool and resposta == False:
-        return flask.Response("Resposta não está pronta", status=202)
+        return respostaComLog("Resposta não está pronta", status=202)
     if type(resposta) == type(None):
-        return flask.Response("Resposta não encontrada", status=404)
+        return respostaComLog("Resposta não encontrada", status=404)
     
 
     #identificando o tipo de dado pedido para retorno
     try:
         tipo_pedido = flask.request.headers["accept"]
     except KeyError:
-        return flask.Response("Sem header Accept", status=400)
+        return respostaComLog("Sem header Accept", status=400)
 
     if tipo_pedido == "text/plain":
         #retornando o texto da resposta em si
@@ -143,14 +158,14 @@ def resposta(uid, indice):
         try:
             gerador = gerarStreamAudio(resposta)
         except AssertionError:
-            return flask.Response("Erro no TTS", status=500)
+            return respostaComLog("Erro no TTS", status=500)
         
         #retornando a stream de áudio
         return servidor.response_class(gerador())
     
 
     #se não recebemos o accept correto retorna que não é suportado
-    return flask.Response(status=415)
+    return respostaComLog("Tipo de dado não suportado", status=415)
 
 
 if __name__ == '__main__':
