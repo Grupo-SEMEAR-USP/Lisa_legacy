@@ -14,6 +14,16 @@ logger = structlog.get_logger("servidorLisa")
 
 
 def respostaComLog(mensagem, status, *args):
+    '''
+    A função respostaComLog retorna uma resposta de flask, além de loggar
+    eventos com o logger no nível debug caso o status não seja um erro do
+    servidor e no nível debug caso seja
+
+    Essa função deve ser utilizada quando se intende que o retorno seja uma
+    informação de erro de alguma forma, pois o conteúdo da mensagem é utilizado
+    como a mensagem de logging.
+    '''
+
     if status < 500:
         logger.debug(
             mensagem, status=status, 

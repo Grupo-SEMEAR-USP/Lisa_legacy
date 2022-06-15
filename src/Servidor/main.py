@@ -9,6 +9,12 @@ from servidor import servidor
 
 
 def tirarUnderscores(logger, log_method, event_dict):
+    '''
+    A função tirarUnderscores é um processador de structlog que retira todas
+    as chaves no dicionário de eventos que começam com "_", isso foi feito pois
+    utilizar o structlog.stdlib.ProcessorFormatter cria chaves extras com "_" 
+    que não tem significado para o logging e apenas criam informações inúteis
+    '''
     
     underscores = [k for k in event_dict.keys() if k[0]=="_"]
     for k in underscores:
@@ -17,7 +23,14 @@ def tirarUnderscores(logger, log_method, event_dict):
 
 
 def configurarLogging(json=False, debug=False):
+    '''
+    A função configurarLogging configura o structlog para todo o programa da 
+    Lisa, utilizando o nível de logging especificado como debug ou warning,
+    além de opcionalmente utilizar JSON como saída, ou uma formatação de
+    console por padrão.
+    '''
     
+    #renderizador final que vai colocar na tela a saída dos logs
     if json:
         renderizador = structlog.processors.JSONRenderer()
     else:
@@ -25,6 +38,7 @@ def configurarLogging(json=False, debug=False):
     
     nivel_logs = logging.DEBUG if debug else logging.WARN
 
+    #apenas pede para que todos os logs do structlog passem pelo formatador
     structlog.configure(
         processors=[
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
@@ -33,6 +47,9 @@ def configurarLogging(json=False, debug=False):
     )
 
 
+    #formatador que deixa as nossas mensagens bem organizadas, tendo desde o
+    #nome do logger utilizado até a hora que o log ocorreu e traces de stack
+    #caso seja pedido
     formatador = structlog.stdlib.ProcessorFormatter(
         processors=[
             structlog.stdlib.add_logger_name,
@@ -45,15 +62,22 @@ def configurarLogging(json=False, debug=False):
         ],
     )
 
+    #executor que vai conectar todos os logs do módulo logging ao formatador
     executor_logs = logging.StreamHandler()
     executor_logs.setFormatter(formatador)
 
+    #pega o logger que baseia todos os outros (root) e configura
     logger_base = logging.getLogger()
     logger_base.addHandler(executor_logs)
     logger_base.setLevel(nivel_logs)
 
 
 def lerArgumentos():
+    '''
+    A função lerArgumentos define e lê todos os argumentos de linha de comando
+    retornando todos os argumentos
+    '''
+
     leitor_args = argparse.ArgumentParser(
         description="Programa inicial do servidor da Lisa",
         add_help=False
@@ -95,4 +119,6 @@ if __name__ == "__main__":
     
     configurarLogging(args.json, args.debug)
 
+    #utiliza o módulo waitress para servir o programa pois o servidor integrado
+    #do flask é apenas para desenvolvimento
     waitress.serve(servidor, host=args.host, port=args.porta)
