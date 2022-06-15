@@ -1,10 +1,13 @@
 import queue
 import random
 import threading
+import structlog
 from reconhecimentoAudio import reconhecerAudio
 from reconhecimentoSentido import gerarResposta
 from speech_recognition import UnknownValueError
 
+
+logger = structlog.get_logger("Lisa")
 
 
 class Lisa:
@@ -23,6 +26,8 @@ class Lisa:
         #há um máximo de Lisas por questão de uso de memória
         if len(Lisa.lisas)+1 > 256:
             raise OverflowError("Lisas demais")
+        if len(Lisa.lisas) == 255:
+            logger.warning("Máximo de Lisas Atingido")
 
         self.pedidos   = queue.Queue(32)
         self.respostas = [None]*32
@@ -36,6 +41,7 @@ class Lisa:
         self.uid = uid
 
         #coloca essa Lisa na lista de Lisas
+        logger.debug("Registrando Lisa", uid=self.uid)
         Lisa.lisas[self.uid] = self
         
         #cria uma thread para processar os pedidos e começa ela
@@ -72,6 +78,12 @@ class Lisa:
         #indica que o índice está sendo utilizado, mas não está pronto
         self.respostas[indice] = False
 
+        logger.debug("Adicionando Pedido", 
+            uid=self.uid, 
+            indice=indice, 
+            compreender=compreender
+        )
+
         self.pedidos.put((entrada, indice, compreender), block=False)
 
         return indice
@@ -84,18 +96,38 @@ class Lisa:
         '''
 
         while True:
-            pedido, indice, compreender = self.pedidos.get()
+            try:
+                pedido, indice, compreender = self.pedidos.get()
+                logger.debug("Processando pedido", 
+                    uid=self.uid, 
+                    indice=indice, 
+                    compreender=compreender
+                )
 
-            if type(pedido) == str:
-                texto = pedido
-            elif type(pedido) == bytes:
-                try:
-                    texto = reconhecerAudio(pedido)
-                except UnknownValueError:
+                if type(pedido) == str:
+                    texto = pedido
+                elif type(pedido) == bytes:
+                    try:
+                        texto = reconhecerAudio(pedido)
+                    except UnknownValueError:
+                        logger.warning("Texto vazio", uid=self.uid, indice=indice)
+                        texto = ""
+                else:
+                    logger.error("Tipo de pedido inválido", 
+                        uid=self.uid, 
+                        indice=indice,
+                        tipo=type(pedido)
+                    )
                     texto = ""
             
-            if not compreender:
-                self.respostas[indice] = texto
-                continue
+                if not compreender:
+                    self.respostas[indice] = texto
+                    continue
             
-            self.respostas[indice] = gerarResposta(texto)
+                self.respostas[indice] = gerarResposta(texto)
+            except Exception as e:
+                logger.critical("Erro em processarPedidos", 
+                    uid=self.uid, 
+                    indice=indice,
+                    exc_info=True
+                )
