@@ -15,9 +15,17 @@ logger = structlog.get_logger("servidorLisa")
 
 def routeComLog(caminho, **opcoes):
     '''
+    A função routeComLog retorna um decorador que adiciona uma função à uma
+    rota de caminho de HTTP para o servidor, adicionando uma mensagem de log
+    para cada pedido que ocorrer. Os argumentos são os mesmos que para o
+    método flask.Flask.route, pois eles realizam a mesma coisa só que
+    precedendo do log.
     '''
 
+    #cria o decorador em si
     def decorador(funcao):
+        #cria a nova função que será retornada contendo o log e a chamada da 
+        #função original
         def funcao_nova(*args, **kwargs):
             logger.info("Recebendo pedido HTTP", 
                 caminho=flask.request.path, 
@@ -160,7 +168,7 @@ def resposta(uid, indice):
     #deletando a resposta caso o metodo seja esse
     if flask.request.method == "DELETE":
         lisa.respostas[int(indice)] = None
-        return respostaComLog("ok")
+        return respostaComLog("ok", "Retornando ok para o delete de Lisa")
 
 
     #identificando se a resposta está pronta e existe
@@ -204,6 +212,6 @@ def resposta(uid, indice):
 if __name__ == '__main__':
     #roda o servidor, em modo de debug, escutando na porta 8080 em todos os
     #hostnames, ou seja, é possível acessar o servidor em 
-    #http://localhost:8080 ou http://192.168.0.seu_ip:8080, por exemplo
+    #http://localhost:8080 ou http://seu_ip_local:8080, por exemplo
 
     servidor.run("0.0.0.0", 8080, True)

@@ -7,6 +7,7 @@ import sys
 
 from servidor import servidor
 
+
 nivel_logs_dict = {
     "debug":logging.DEBUG, 
     "info":logging.INFO, 
@@ -14,7 +15,6 @@ nivel_logs_dict = {
     "error":logging.ERROR, 
     "critical":logging.CRITICAL
 }
-
 
 def tirarUnderscores(logger, log_method, event_dict):
     '''
