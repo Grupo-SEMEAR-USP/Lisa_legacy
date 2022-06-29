@@ -13,32 +13,50 @@ servidor = flask.Flask("flask")
 logger = structlog.get_logger("servidorLisa")
 
 
-def respostaComLog(mensagem, status, *args):
+def routeComLog(caminho, **opcoes):
+    '''
+    '''
+
+    def decorador(funcao):
+        def funcao_nova(*args, **kwargs):
+            logger.info("Recebendo pedido HTTP", 
+                caminho=flask.request.path, 
+                metodo=flask.request.method,
+                endereco_remoto=flask.request.remote_addr
+            )
+            return funcao(*args, **kwargs)
+
+        servidor.add_url_rule(caminho, caminho, funcao_nova, **opcoes)
+        return funcao_nova
+
+    return decorador
+
+def respostaComLog(mensagem, log=None, status=200, *args):
     '''
     A função respostaComLog retorna uma resposta de flask, além de loggar
-    eventos com o logger no nível debug caso o status não seja um erro do
-    servidor e no nível debug caso seja
-
-    Essa função deve ser utilizada quando se intende que o retorno seja uma
-    informação de erro de alguma forma, pois o conteúdo da mensagem é utilizado
-    como a mensagem de logging.
+    eventos com logs de debug em respostas ok ou de procedimento, info em
+    respostas com erro de usuário e erro em respostas com erro de servidor
     '''
 
-    if status < 500:
-        logger.debug(
-            mensagem, status=status, 
-            caminho=flask.request.path,
-            metodo=flask.request.method
-        )
+    if status < 400:
+        funcao_logging = logger.debug
+    elif status < 500:
+        funcao_logging = logger.info
     else:
-        #como o caminho e método pode ser diretamente manipulado pelo usuário,
-        #não podemos incluir em logs que não sejam de debug por segurança
-        logger.error(mensagem, status=status)
+        funcao_logging = logger.error
+    
+    funcao_logging(log if log is not None else mensagem, 
+        *args,
+        status=status,
+        caminho=flask.request.path,
+        metodo=flask.request.method,
+        endereco_remoto=flask.request.remote_addr
+    )
     
     return flask.Response(mensagem, status, *args)
 
 
-@servidor.route("/registrar", methods=["POST"])
+@routeComLog("/registrar", methods=["POST"])
 def registrar():
     '''
     A função registrar registra uma nova instância de Lisa, 
@@ -50,10 +68,9 @@ def registrar():
     except OverflowError:
         return respostaComLog("Lisas demais", status=507)
     
-    return flask.Response(str(lisa.uid))
+    return respostaComLog(str(lisa.uid), "Retornando registro de Lisa")
 
-
-@servidor.route("/<uid>/responder", methods=["POST"])
+@routeComLog("/<uid>/responder", methods=["POST"])
 def responder(uid):
     '''
     A função responder cria uma entrada nas respostas com o texto da resposta
@@ -109,10 +126,10 @@ def responder(uid):
         return respostaComLog("Respostas demais", status=507)
 
     #retornando o índice que a resposta se encontrará na lista
-    return flask.Response(str(indice_pedido))
+    return respostaComLog(str(indice_pedido), "Retornando indice")
 
 
-@servidor.route("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
+@routeComLog("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
 def resposta(uid, indice):
     '''
     A função resposta retorna a resposta em áudio ou texto com um índice
@@ -143,7 +160,7 @@ def resposta(uid, indice):
     #deletando a resposta caso o metodo seja esse
     if flask.request.method == "DELETE":
         lisa.respostas[int(indice)] = None
-        return flask.Response(status=200)
+        return respostaComLog("ok")
 
 
     #identificando se a resposta está pronta e existe
@@ -161,7 +178,7 @@ def resposta(uid, indice):
 
     if tipo_pedido == "text/plain":
         #retornando o texto da resposta em si
-        return flask.Response(resposta)
+        return respostaComLog(resposta, "Retornando texto")
 
     if tipo_pedido == "audio/mp3":
         #gerando a stream de áudio de TTS
@@ -169,7 +186,13 @@ def resposta(uid, indice):
             gerador = gerarStreamAudio(resposta)
         except AssertionError:
             return respostaComLog("Erro no TTS", status=500)
-        
+
+        logger.debug("Retornando stream de áudio",
+            status=200,
+            caminho=flask.request.path,
+            metodo=flask.request.method,
+            endereco_remoto=flask.request.remote_addr
+        )     
         #retornando a stream de áudio
         return servidor.response_class(gerador())
     

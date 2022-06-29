@@ -7,6 +7,14 @@ import sys
 
 from servidor import servidor
 
+nivel_logs_dict = {
+    "debug":logging.DEBUG, 
+    "info":logging.INFO, 
+    "warning":logging.WARNING, 
+    "error":logging.ERROR, 
+    "critical":logging.CRITICAL
+}
+
 
 def tirarUnderscores(logger, log_method, event_dict):
     '''
@@ -22,12 +30,11 @@ def tirarUnderscores(logger, log_method, event_dict):
     return event_dict
 
 
-def configurarLogging(json=False, debug=False):
+def configurarLogging(nivel_logs, json=False):
     '''
     A função configurarLogging configura o structlog para todo o programa da 
-    Lisa, utilizando o nível de logging especificado como debug ou warning,
-    além de opcionalmente utilizar JSON como saída, ou uma formatação de
-    console por padrão.
+    Lisa, utilizando o nível de logging especificado, além de opcionalmente 
+    utilizar JSON como saída, diferente da formatação para terminal padrão.
     '''
     
     #renderizador final que vai colocar na tela a saída dos logs
@@ -35,8 +42,6 @@ def configurarLogging(json=False, debug=False):
         renderizador = structlog.processors.JSONRenderer()
     else:
         renderizador = structlog.dev.ConsoleRenderer()
-    
-    nivel_logs = logging.DEBUG if debug else logging.WARN
 
     #apenas pede para que todos os logs do structlog passem pelo formatador
     structlog.configure(
@@ -89,11 +94,12 @@ def lerArgumentos():
     )
     leitor_args.add_argument(
         "-j", "--json", action="store_true",
-        help="Realiza logs por JSON ao invés da interface de terminal, padrão: Falso"
+        help="Realiza logs por JSON ao invés da interface de terminal"
     )
     leitor_args.add_argument(
-        "-d", "--debug", action="store_true",
-        help="Inicia o programa em modo de debug, padrão: Falso"
+        "-n", "--nivel", default="info", choices=nivel_logs_dict.keys(),
+        help="Coloca na tela todos os logs iguais ou acima de determinado \
+            nível, padrão: info"
     )
     leitor_args.add_argument(
         "-p", "--porta", type=int, default=8080,
@@ -117,7 +123,9 @@ def lerArgumentos():
 if __name__ == "__main__":
     args = lerArgumentos()
     
-    configurarLogging(args.json, args.debug)
+    configurarLogging(nivel_logs_dict[args.nivel], args.json)
+    logger = structlog.get_logger("main")
+    logger.info("Inicializando programa")
 
     #utiliza o módulo waitress para servir o programa pois o servidor integrado
     #do flask é apenas para desenvolvimento

@@ -25,6 +25,9 @@ class Lisa:
     def __init__(self):
         #há um máximo de Lisas por questão de uso de memória
         if len(Lisa.lisas)+1 > 256:
+            logger.error("Tentou criar mais Lisas que suportado", 
+                stack_info=True
+            )
             raise OverflowError("Lisas demais")
         if len(Lisa.lisas) == 255:
             logger.warning("Máximo de Lisas Atingido")
@@ -41,7 +44,7 @@ class Lisa:
         self.uid = uid
 
         #coloca essa Lisa na lista de Lisas
-        logger.debug("Registrando Lisa", uid=self.uid)
+        logger.debug("Registrando Lisa", uid=self.uid, total=len(Lisa.lisas)+1)
         Lisa.lisas[self.uid] = self
         
         #cria uma thread para processar os pedidos e começa ela
@@ -70,15 +73,21 @@ class Lisa:
 
         except StopIteration:
             #se não houver nenhum índice com None retorna erro
+            logger.Error("Respostas demais", uid=self.uid)
             raise OverflowError("Respostas demais")
         
         if type(entrada) != str and type(entrada) != bytes:
+            logger.warning("entrada de tipo inválido", 
+                tipo="audio" if type(entrada) == bytes else "texto", 
+                uid=self.uid
+            )
             raise ValueError("Tipo inválido")
 
         #indica que o índice está sendo utilizado, mas não está pronto
         self.respostas[indice] = False
 
-        logger.debug("Adicionando Pedido", 
+        logger.info("Adicionando Pedido",
+            tipo="audio" if type(entrada) == bytes else "texto",
             uid=self.uid, 
             indice=indice, 
             compreender=compreender
@@ -98,7 +107,8 @@ class Lisa:
         while True:
             try:
                 pedido, indice, compreender = self.pedidos.get()
-                logger.debug("Processando pedido", 
+                logger.debug("Processando pedido",
+                    tipo="audio" if type(pedido) == bytes else "texto",
                     uid=self.uid, 
                     indice=indice, 
                     compreender=compreender
@@ -110,13 +120,16 @@ class Lisa:
                     try:
                         texto = reconhecerAudio(pedido)
                     except UnknownValueError:
-                        logger.warning("Texto vazio", uid=self.uid, indice=indice)
+                        logger.warning("Nada foi reconhecido no áudio", 
+                            uid=self.uid, 
+                            indice=indice
+                        )
                         texto = ""
                 else:
                     logger.error("Tipo de pedido inválido", 
                         uid=self.uid, 
                         indice=indice,
-                        tipo=type(pedido)
+                        tipo="audio" if type(pedido) == bytes else "texto"
                     )
                     texto = ""
             
