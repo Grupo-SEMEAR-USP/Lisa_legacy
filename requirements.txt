@@ -16,3 +16,7 @@ soundfile
 streamlit
 spacy_streamlit
 flask
+numpy
+scypi.io
+python_speech_features
+io
