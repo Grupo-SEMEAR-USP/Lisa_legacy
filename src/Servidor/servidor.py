@@ -1,17 +1,70 @@
 import flask
+import queue
+import structlog
 
 from TTSLisa import gerarStreamAudio
 from reconhecimentoSentido import gerarResposta
 from reconhecimentoAudio import reconhecerAudio
 from speech_recognition import UnknownValueError
 from Lisa import Lisa
-import queue
 
 
-servidor = flask.Flask("servidorLisa")
+servidor = flask.Flask("flask")
+logger = structlog.get_logger("servidorLisa")
 
 
-@servidor.route("/registrar", methods=["POST"])
+def routeComLog(caminho, **opcoes):
+    '''
+    A função routeComLog retorna um decorador que adiciona uma função à uma
+    rota de caminho de HTTP para o servidor, adicionando uma mensagem de log
+    para cada pedido que ocorrer. Os argumentos são os mesmos que para o
+    método flask.Flask.route, pois eles realizam a mesma coisa só que
+    precedendo do log.
+    '''
+
+    #cria o decorador em si
+    def decorador(funcao):
+        #cria a nova função que será retornada contendo o log e a chamada da 
+        #função original
+        def funcao_nova(*args, **kwargs):
+            logger.info("Recebendo pedido HTTP", 
+                caminho=flask.request.path, 
+                metodo=flask.request.method,
+                endereco_remoto=flask.request.remote_addr
+            )
+            return funcao(*args, **kwargs)
+
+        servidor.add_url_rule(caminho, caminho, funcao_nova, **opcoes)
+        return funcao_nova
+
+    return decorador
+
+def respostaComLog(mensagem, log=None, status=200, *args):
+    '''
+    A função respostaComLog retorna uma resposta de flask, além de loggar
+    eventos com logs de debug em respostas ok ou de procedimento, info em
+    respostas com erro de usuário e erro em respostas com erro de servidor
+    '''
+
+    if status < 400:
+        funcao_logging = logger.debug
+    elif status < 500:
+        funcao_logging = logger.info
+    else:
+        funcao_logging = logger.error
+    
+    funcao_logging(log if log is not None else mensagem, 
+        *args,
+        status=status,
+        caminho=flask.request.path,
+        metodo=flask.request.method,
+        endereco_remoto=flask.request.remote_addr
+    )
+    
+    return flask.Response(mensagem, status, *args)
+
+
+@routeComLog("/registrar", methods=["POST"])
 def registrar():
     '''
     A função registrar registra uma nova instância de Lisa, 
@@ -21,12 +74,11 @@ def registrar():
     try:
         lisa = Lisa()
     except OverflowError:
-        return flask.Response("Lisas demais", status=507)
+        return respostaComLog("Lisas demais", status=507)
     
-    return flask.Response(str(lisa.uid), status=201)
+    return respostaComLog(str(lisa.uid), "Retornando registro de Lisa")
 
-
-@servidor.route("/<uid>/responder", methods=["POST"])
+@routeComLog("/<uid>/responder", methods=["POST"])
 def responder(uid):
     '''
     A função responder cria uma entrada nas respostas com o texto da resposta
@@ -45,10 +97,9 @@ def responder(uid):
     try:
         lisa = Lisa.lisas[int(uid)]
     except KeyError:
-        return flask.Response("Lisa não encontrada", status=404)
+        return respostaComLog("Lisa não encontrada", status=404)
     except ValueError:
-        return flask.Response("Uid não é um número", status=400)
-
+        return respostaComLog("Uid não é um número", status=400)
 
     #identificando o tipo de entrada
     if flask.request.content_type == "text/plain":
@@ -56,7 +107,7 @@ def responder(uid):
         try:
             entrada = flask.request.get_data().decode("utf-8")
         except UnicodeDecodeError:
-            return flask.Response("Entrada não é UTF-8", status=400)
+            return respostaComLog("Entrada não é UTF-8", status=400)
 
     elif flask.request.content_type == "audio/wav":
         #pega o áudio todo como uma sequência de bytes
@@ -64,7 +115,7 @@ def responder(uid):
     
     else:
         #se não recebems texto ou wav algo está errado
-        return flask.Response("Tipo de dado não suportado", status=415)
+        return respostaComLog("Tipo de dado não suportado", status=415)
 
 
     #identificando o header de compreensão
@@ -78,15 +129,15 @@ def responder(uid):
         #pede para a Lisa processar essa entrada
         indice_pedido = lisa.adicionarPedido(entrada, compreender)
     except queue.Full:
-        return flask.Response("Muitos pedidos no buffer", status=507)
+        return respostaComLog("Muitos pedidos no buffer", status=507)
     except OverflowError:
-        return flask.Response("Respostas demais", status=507)
+        return respostaComLog("Respostas demais", status=507)
 
     #retornando o índice que a resposta se encontrará na lista
-    return flask.Response(str(indice_pedido))
+    return respostaComLog(str(indice_pedido), "Retornando indice")
 
 
-@servidor.route("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
+@routeComLog("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
 def resposta(uid, indice):
     '''
     A função resposta retorna a resposta em áudio ou texto com um índice
@@ -100,61 +151,67 @@ def resposta(uid, indice):
     try:
         lisa = Lisa.lisas[int(uid)]
     except KeyError:
-        return flask.Response("Lisa não encontrada", status=404)
+        return respostaComLog("Lisa não encontrada", status=404)
     except ValueError:
-        return flask.Response("Uid não é um número", status=400)
+        return respostaComLog("Uid não é um número", status=400)
 
 
     #identificando a resposta baseado no índice
     try:
         resposta = lisa.respostas[int(indice)]
     except ValueError:
-        return flask.Response("Indice não é um número", status=400)
+        return respostaComLog("Indice não é um número", status=400)
     except KeyError:
-        return flask.Response("Indice não está entre 0 e 32", status=400)
+        return respostaComLog("Indice não está entre 0 e 32", status=400)
 
 
     #deletando a resposta caso o metodo seja esse
     if flask.request.method == "DELETE":
         lisa.respostas[int(indice)] = None
-        return flask.Response(status=200)
+        return respostaComLog("ok", "Retornando ok para o delete de Lisa")
 
 
     #identificando se a resposta está pronta e existe
     if type(resposta) == bool and resposta == False:
-        return flask.Response("Resposta não está pronta", status=202)
+        return respostaComLog("Resposta não está pronta", status=202)
     if type(resposta) == type(None):
-        return flask.Response("Resposta não encontrada", status=404)
+        return respostaComLog("Resposta não encontrada", status=404)
     
 
     #identificando o tipo de dado pedido para retorno
     try:
         tipo_pedido = flask.request.headers["accept"]
     except KeyError:
-        return flask.Response("Sem header Accept", status=400)
+        return respostaComLog("Sem header Accept", status=400)
 
     if tipo_pedido == "text/plain":
         #retornando o texto da resposta em si
-        return flask.Response(resposta)
+        return respostaComLog(resposta, "Retornando texto")
 
     if tipo_pedido == "audio/mp3":
         #gerando a stream de áudio de TTS
         try:
             gerador = gerarStreamAudio(resposta)
         except AssertionError:
-            return flask.Response("Erro no TTS", status=500)
-        
+            return respostaComLog("Erro no TTS", status=500)
+
+        logger.debug("Retornando stream de áudio",
+            status=200,
+            caminho=flask.request.path,
+            metodo=flask.request.method,
+            endereco_remoto=flask.request.remote_addr
+        )     
         #retornando a stream de áudio
         return servidor.response_class(gerador())
     
 
     #se não recebemos o accept correto retorna que não é suportado
-    return flask.Response(status=415)
+    return respostaComLog("Tipo de dado não suportado", status=415)
 
 
 if __name__ == '__main__':
     #roda o servidor, em modo de debug, escutando na porta 8080 em todos os
     #hostnames, ou seja, é possível acessar o servidor em 
-    #http://localhost:8080 ou http://192.168.0.seu_ip:8080, por exemplo
+    #http://localhost:8080 ou http://seu_ip_local:8080, por exemplo
 
     servidor.run("0.0.0.0", 8080, True)

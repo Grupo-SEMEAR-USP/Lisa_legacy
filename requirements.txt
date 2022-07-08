@@ -16,3 +16,5 @@ soundfile
 streamlit
 spacy_streamlit
 flask
+structlog
+waitress
