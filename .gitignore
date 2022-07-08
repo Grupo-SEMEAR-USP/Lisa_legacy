@@ -3,7 +3,7 @@
 !.gitignore
 
 #todos os arquivos executáveis compilados não devem ir para o repositório
-build
+build/
 
 #pycache deve ser local
 __pycache__
@@ -25,3 +25,6 @@ model-best
 *.spacy
 project.lock
 db.json
+
+#arquivos do esp-idf de configuração
+skconfig
