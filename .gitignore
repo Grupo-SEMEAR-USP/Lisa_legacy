@@ -27,4 +27,4 @@ project.lock
 db.json
 
 #arquivos do esp-idf de configuração
-skconfig
+sdkconfig*

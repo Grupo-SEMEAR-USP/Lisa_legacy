@@ -237,8 +237,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
     return ESP_OK;
 }
 
-static void http_rest_with_url(void)
-{
+static void http_rest_with_url(void) {
     char local_response_buffer[1024] = {0};
     /*
      * NOTE: All the configuration parameters for http_client must be spefied
@@ -257,13 +256,10 @@ static void http_rest_with_url(void)
         .user_data = local_response_buffer,
         .disable_auto_redirect = true,
     };
-    ESP_LOGI(TAG, "init");
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     // GET
-    ESP_LOGI(TAG, "GET");
     esp_err_t err = esp_http_client_perform(client);
-    ESP_LOGI(TAG, "GOT");
     if (err == ESP_OK) {
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
                 esp_http_client_get_status_code(client),
@@ -271,31 +267,27 @@ static void http_rest_with_url(void)
     } else {
         ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
-    ESP_LOGI(TAG, "print");
     ESP_LOGI(TAG, "%s", local_response_buffer);
 
     esp_http_client_close(client);
     esp_http_client_cleanup(client);
 }
 
-
-void app_main(void){
+void setupStorage(void){
     esp_err_t ret = nvs_flash_init();
-    if (
-        ret == ESP_ERR_NVS_NO_FREE_PAGES || 
-        ret == ESP_ERR_NVS_NEW_VERSION_FOUND
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND
     ) {
       ESP_ERROR_CHECK(nvs_flash_erase());
       ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+}
 
-    ESP_LOGI(TAG, "HELLO!");
+void app_main(void){
+    ESP_LOGI(TAG, "Entering Main");
     connect_wifi();
     while (1) {
-        ESP_LOGI(TAG, "wait");
         sys_delay_ms(1000);
-        ESP_LOGI(TAG, "start");
         http_rest_with_url();
     }
 }
