@@ -5,6 +5,8 @@ import sys
 from gravarAudio import gravarAudioArquivo
 from urllib.parse import urljoin
 import time
+import scipy.io.wavfile
+import numpy as np
 
 
 class ClienteLisa:
@@ -98,7 +100,7 @@ class ClienteLisa:
         url_pedido = urljoin(url_pedido, "respostas") + "/"
         url_pedido = urljoin(url_pedido, indice)
         resposta = self.enviarHTTP(url_pedido, headers={
-            "accept": "audio/mp3" if audio else "text/plain"
+            "accept": "audio/wav" if audio else "text/plain"
         }, method="get")
         
         return resposta.content
@@ -122,10 +124,10 @@ class ClienteLisa:
         if self.debug:
             print(f"falando áudio de tamanho {len(audio)//1024} kb")
         
+        dados = np.frombuffer(audio, dtype=np.float64)
+
         nome_arquivo = "tmp.wav"
-        arq = open(nome_arquivo, "wb")
-        arq.write(audio)
-        arq.close()
+        scipy.io.wavfile.write(nome_arquivo, 24000, dados)
         playsound.playsound(nome_arquivo)
         os.remove(nome_arquivo)
     

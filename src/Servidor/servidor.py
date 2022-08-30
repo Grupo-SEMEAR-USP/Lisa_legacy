@@ -2,7 +2,7 @@ import flask
 import queue
 import structlog
 
-from TTSLisa import gerarStreamAudio
+from TTSLisa import gerarAudio
 from reconhecimentoSentido import gerarResposta
 from reconhecimentoAudio import reconhecerAudio
 from speech_recognition import UnknownValueError
@@ -144,7 +144,7 @@ def resposta(uid, indice):
     específico, ou deleta a resposta caso o metodo seja esse
 
     É necessária a presença de um header "accept" que identifica o tipo de dado
-    pedido, sendo um de "text/plain" ou "audio/mp3"
+    pedido, sendo um de "text/plain" ou "audio/wav"
     '''
 
     #identificando o cliente
@@ -188,21 +188,13 @@ def resposta(uid, indice):
         #retornando o texto da resposta em si
         return respostaComLog(resposta, "Retornando texto")
 
-    if tipo_pedido == "audio/mp3":
-        #gerando a stream de áudio de TTS
+    if tipo_pedido == "audio/wav":
         try:
-            gerador = gerarStreamAudio(resposta)
+            audio = gerarAudio(resposta)
         except AssertionError:
             return respostaComLog("Erro no TTS", status=500)
 
-        logger.debug("Retornando stream de áudio",
-            status=200,
-            caminho=flask.request.path,
-            metodo=flask.request.method,
-            endereco_remoto=flask.request.remote_addr
-        )     
-        #retornando a stream de áudio
-        return servidor.response_class(gerador())
+        return respostaComLog(audio.tobytes(), "Retornando áudio")
     
 
     #se não recebemos o accept correto retorna que não é suportado
