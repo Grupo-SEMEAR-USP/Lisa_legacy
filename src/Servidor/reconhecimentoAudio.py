@@ -1,36 +1,37 @@
 import speech_recognition as sr
 import numpy as np
-import librosa
+import sounddevice as sd
+import soundfile as sf
 
 
-def trataAudio(audio):
+def trataAudio(audio, taxa_amostragem, duracao):
 
-    # Carregando o áudio
-    x, sr = librosa.load(audio, sr=None)
+    passa_alta = False
+    amplitude = 0.3
 
-    # Computando a magnitude e a fase do espectograma
-    espectograma_completo = librosa.magphase(librosa.stft(x))
+    duracao_amostragem = int(duracao * taxa_amostragem)
 
-    # Aplicando uma filtragem que utiliza similaridade por cossenos
-    espectograma_filtrado = librosa.decompose.nn_filter(espectograma_completo,
-                                                        aggregate=np.median,
-                                                        metric='cosine',
-                                                        width=int(librosa.time_to_frames(2, sr=sr)))
+    sinal_entrada = audio
 
-    # A saída do filtro não deve ser maior que a entrada
-    espectograma_filtrado = np.minimum(espectograma_completo, espectograma_filtrado)
+    freq_corte = np.geomspace(20000, 20, sinal_entrada.shape[0])
+    passaAlta_saida = np.zeros_like(sinal_entrada)
+    dn_1 = 0
 
-    # Margens para reduzir o ruído entre a voz e máscara de segmentação
-    margem_i, margem_v = 2, 10
-    mascara_i = librosa.util.softmask(espectograma_filtrado,
-                                      margem_i * (espectograma_completo -espectograma_filtrado),
-                                      power=2)
-    mascara_v = librosa.util.softmask(espectograma_completo - espectograma_filtrado,
-                                      margem_v * espectograma_filtrado,
-                                      power=2)
+    for n in range(sinal_entrada.shape[0]):
+        freq_quebra = freq_corte[n]
 
-    audio_tratado = mascara_v * espectograma_completo
-    audio_ruidoso = mascara_i * espectograma_completo
+        tan = np.tan(np.pi * freq_quebra / taxa_amostragem)
+        a1 = (tan - 1) / (tan + 1)
+
+        passaAlta_saida[n] = a1 * sinal_entrada[n] + dn_1
+        dn_1 = sinal_entrada[n] - a1 * passaAlta_saida[n]
+
+    if passa_alta:
+        passaAlta_saida *= -1
+
+    audio_tratado = sinal_entrada + passaAlta_saida
+    audio_tratado *= 0.5
+    audio_tratado *= amplitude
 
     return audio_tratado
 
@@ -38,9 +39,16 @@ def trataAudio(audio):
 def reconhecerAudio(audio, sample_rate=44100, sample_width=2):
     rec = sr.Recognizer()
 
-    audiodata = sr.AudioData(audio, sample_rate, sample_width)
+    sd.play(audio, sample_rate)
+    sd.wait()
 
-    texto = rec.recognize_google(audiodata, language="pt-BR")
+    try:
+        rec.adjust_for_ambient_noise(audio)
+        audiodata = sr.AudioData(audio, sample_rate, sample_width)
+        texto = rec.recognize_google(audiodata, language="pt-BR", show_all=False)
+    except:
+        return None
+
     return texto
 
 
@@ -57,11 +65,12 @@ if __name__ == "__main__":
     import os
 
     gravarAudioArquivo("exemplo.wav")
-    audio = os.getcwd() + "/exemplo.wav"
+    data = sf.SoundFile('exemplo.wav')
+    duracao = data.frames / data.samplerate
+    data, taxa_amostragem = sf.read('exemplo.wav')
 
-    audio_tratado = trataAudio(audio)
+    audio_tratado = trataAudio(np.array(data), taxa_amostragem, duracao)
     texto = reconhecerAudio(audio_tratado)
     print(texto)
 
-    arq.close()
     os.remove("exemplo.wav")
