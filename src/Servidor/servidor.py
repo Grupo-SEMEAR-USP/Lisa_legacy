@@ -1,11 +1,8 @@
 import flask
-import queue
 import structlog
 
 from TTSLisa import gerarAudio
-from reconhecimentoSentido import gerarResposta
 from reconhecimentoAudio import reconhecerAudio
-from speech_recognition import UnknownValueError
 from Lisa import Lisa
 
 
@@ -63,6 +60,20 @@ def respostaComLog(mensagem, log=None, status=200, *args):
     
     return flask.Response(mensagem, status, *args)
 
+def receberEntrada(request):
+    if request.content_type == "":
+        raise ValueError()
+    
+    if request.content_type == "text/plain":
+        #pega o texto todo como uma string
+        return request.get_data().decode("utf-8")
+
+    if request.content_type == "audio/wav":
+        #pega o áudio todo como uma sequência de bytes
+        return reconhecerAudio(request.get_data())
+
+    raise ValueError()
+
 
 @routeComLog("/registrar", methods=["POST"])
 def registrar():
@@ -81,16 +92,20 @@ def registrar():
 @routeComLog("/<uid>/responder", methods=["POST"])
 def responder(uid):
     '''
-    A função responder cria uma entrada nas respostas com o texto da resposta
-    da Lisa a um áudio ou texto recebido no corpo do pedido. Essa é a função 
-    principal do servidor e é essencial para o funcionamento da robô.
+    A função responder retorna um áudio ou texto com uma resposta a um um áudio
+    ou texto recebido. Essa é a função principal do servidor e é essencial para
+    o funcionamento da robô.
     
-    Caso o header "compreender" esteja presente e tenha valor "false", o texto
-    não passará pelo processamento de sentido, sendo apenas copiado para a
-    lista de respostas, feito para debugging do código de comunicação
+    São necessários três headers: 
+        compreender: pode ser true ou false para identificar se o valor deve
+        ser interpretado ou somente repetido (útil para converter áudio em 
+        texto e vice-versa)
+    
+        content-type: tipo de dado de entrada, pode ser text/plain ou 
+        audio/wav.
 
-    É necessário para identificar o tipo de entrada a presença do header
-    "content-type", contendo um de "text/plain" ou "audio/wav"
+        accept: tipo de dado aceito como saída, pode ser text/plain ou 
+        audio/wav.
     '''
     
     #identificando o cliente
@@ -100,23 +115,6 @@ def responder(uid):
         return respostaComLog("Lisa não encontrada", status=404)
     except ValueError:
         return respostaComLog("Uid não é um número", status=400)
-
-    #identificando o tipo de entrada
-    if flask.request.content_type == "text/plain":
-        #pega o texto todo como uma string
-        try:
-            entrada = flask.request.get_data().decode("utf-8")
-        except UnicodeDecodeError:
-            return respostaComLog("Entrada não é UTF-8", status=400)
-
-    elif flask.request.content_type == "audio/wav":
-        #pega o áudio todo como uma sequência de bytes
-        entrada = flask.request.get_data()
-    
-    else:
-        #se não recebems texto ou wav algo está errado
-        return respostaComLog("Tipo de dado não suportado", status=415)
-
 
     #identificando o header de compreensão
     try:
@@ -124,66 +122,30 @@ def responder(uid):
     except KeyError:
         compreender = True
 
-    #processando a entrada
+    #identificando o tipo de entrada
     try:
-        #pede para a Lisa processar essa entrada
-        indice_pedido = lisa.adicionarPedido(entrada, compreender)
-    except queue.Full:
-        return respostaComLog("Muitos pedidos no buffer", status=507)
-    except OverflowError:
-        return respostaComLog("Respostas demais", status=507)
-
-    #retornando o índice que a resposta se encontrará na lista
-    return respostaComLog(str(indice_pedido), "Retornando indice")
-
-
-@routeComLog("/<uid>/respostas/<indice>", methods=["GET", "DELETE"])
-def resposta(uid, indice):
-    '''
-    A função resposta retorna a resposta em áudio ou texto com um índice
-    específico, ou deleta a resposta caso o metodo seja esse
-
-    É necessária a presença de um header "accept" que identifica o tipo de dado
-    pedido, sendo um de "text/plain" ou "audio/wav"
-    '''
-
-    #identificando o cliente
-    try:
-        lisa = Lisa.lisas[int(uid)]
-    except KeyError:
-        return respostaComLog("Lisa não encontrada", status=404)
+        entrada = receberEntrada(flask.request)
+    except UnicodeDecodeError:
+        return respostaComLog("Entrada não é UTF-8", status=400)
     except ValueError:
-        return respostaComLog("Uid não é um número", status=400)
-
-
-    #identificando a resposta baseado no índice
-    try:
-        resposta = lisa.respostas[int(indice)]
-    except ValueError:
-        return respostaComLog("Indice não é um número", status=400)
-    except KeyError:
-        return respostaComLog("Indice não está entre 0 e 32", status=400)
-
-
-    #deletando a resposta caso o metodo seja esse
-    if flask.request.method == "DELETE":
-        lisa.respostas[int(indice)] = None
-        return respostaComLog("ok", "Retornando ok para o delete de Lisa")
-
-
-    #identificando se a resposta está pronta e existe
-    if type(resposta) == bool and resposta == False:
-        return respostaComLog("Resposta não está pronta", status=202)
-    if type(resposta) == type(None):
-        return respostaComLog("Resposta não encontrada", status=404)
-    
+        return respostaComLog(
+            "header content-type não existe, não suportado ou incompatível "
+            "com a entrada", status=400)
+    except ConnectionError:
+        return respostaComLog("Erro na conexão para reconhecimento de áudio",
+            status=500)
 
     #identificando o tipo de dado pedido para retorno
     try:
         tipo_pedido = flask.request.headers["accept"]
     except KeyError:
-        return respostaComLog("Sem header Accept", status=400)
+        return respostaComLog("header accept não existe", status=400)
 
+
+    #processando a entrada
+    resposta = lisa.responder(entrada, compreender)
+
+    #retornando a resposta com base no tipo pedido
     if tipo_pedido == "text/plain":
         #retornando o texto da resposta em si
         return respostaComLog(resposta, "Retornando texto")
@@ -196,9 +158,9 @@ def resposta(uid, indice):
 
         return respostaComLog(audio.tobytes(), "Retornando áudio")
     
-
-    #se não recebemos o accept correto retorna que não é suportado
-    return respostaComLog("Tipo de dado não suportado", status=415)
+    #se não recebemos um accept válido retorna que não é suportado
+    return respostaComLog(
+        "header accept não suportado", status=400)
 
 
 if __name__ == '__main__':
