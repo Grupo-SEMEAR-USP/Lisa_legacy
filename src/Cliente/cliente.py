@@ -18,7 +18,7 @@ class ClienteLisa:
     alguns métodos utilitátios
     '''
 
-    def __init__(self, url_base: str, debug: bool=True):
+    def __init__(self, url_base, debug=False):
         self.debug = debug
         self.url = url_base
 
@@ -37,8 +37,8 @@ class ClienteLisa:
         if self.debug:
             print(f"\n\ninformação transferida:", end=" ")
             print(f"{self.informacao_transferida/1024**2} Mb")
-    
-    def responderTexto(self, texto, compreender: bool=True):
+
+    def responderTexto(self, texto, accept, compreender):
         '''
         O método responderTexto envia um pedido em texto para o servidor da
         Lisa, compreendendo ou apenas copiando a resposta
@@ -46,20 +46,21 @@ class ClienteLisa:
 
         if self.debug:
             print("enviando responder texto")
-        
+
         url_pedido = urljoin(self.url, self.uid) + "/"
         url_pedido = urljoin(url_pedido, "responder")
 
         resposta = self.enviarHTTP(url_pedido, texto, headers={
-            "content-type": "text/plain", 
-            "compreender": "true" if compreender else "false"
+            "content-type": "text/plain",
+            "accept": accept,
+            "compreender": compreender
         })
 
-        return resposta.content.decode("utf-8")
+        return resposta.content
 
-    def responderAudio(self, nome_arquivo=None, compreender=True):
+    def responderAudio(self, accept, compreender, nome_arquivo=None):
         '''
-        O método responderAudio faz o mesmo que responderTexto mas para um 
+        O método responderAudio faz o mesmo que responderTexto mas para um
         áudio, além de gravar um arquivo de áudio temporário do usuário caso
         não haja nenhum input de áudio prévio
         '''
@@ -71,66 +72,41 @@ class ClienteLisa:
         if gravar_arquivo:
             nome_arquivo = "tmp.wav"
             self.gravar(nome_arquivo)
-        
+
         arq = open(nome_arquivo, "rb")
-            
+
 
         url_pedido = urljoin(self.url, self.uid) + "/"
         url_pedido = urljoin(url_pedido, "responder")
 
         resposta = self.enviarHTTP(url_pedido, arq, headers={
-            "content-type": "audio/wav", 
-            "compreender": "true" if compreender else "false"
+            "content-type": "audio/wav",
+            "accept": accept,
+            "compreender": compreender
         })
 
         arq.close()
-        
+
         if gravar_arquivo:
             os.remove(nome_arquivo)
 
-        return resposta.content.decode("utf-8")
-    
-    def pegarResposta(self, indice, audio=False):
-        '''
-        O método pegarResposta pede a resposta de determinado índice em áudio
-        ou texto, retornando em ambos os casos um objeto bytes
-        '''
-
-        url_pedido = urljoin(self.url, self.uid) + "/"
-        url_pedido = urljoin(url_pedido, "respostas") + "/"
-        url_pedido = urljoin(url_pedido, indice)
-        resposta = self.enviarHTTP(url_pedido, headers={
-            "accept": "audio/wav" if audio else "text/plain"
-        }, method="get")
-        
         return resposta.content
-    
-    def deletarResposta(self, indice):
-        '''
-        O método deletarResposta deleta a resposta de determinado índice
-        '''
-
-        url_pedido = urljoin(self.url, self.uid) + "/"
-        url_pedido = urljoin(url_pedido, "respostas") + "/"
-        url_pedido = urljoin(url_pedido, indice)
-        resposta = self.enviarHTTP(url_pedido, method="delete")
-
 
     def falar(self, audio):
         '''
         O método falar fala um áudio contido em um objeto bytes
         '''
-        
+
         if self.debug:
             print(f"falando áudio de tamanho {len(audio)//1024} kb")
-        
-        dados = np.frombuffer(audio, dtype=np.float64)
+
+        dados = np.frombuffer(audio, dtype=np.uint8)
 
         nome_arquivo = "tmp.wav"
         scipy.io.wavfile.write(nome_arquivo, 24000, dados)
         playsound.playsound(nome_arquivo)
         os.remove(nome_arquivo)
-    
+
     def gravar(self, arq):
         '''
         O método gravar grava áudio do usuário em um arquivo arq
@@ -140,7 +116,7 @@ class ClienteLisa:
             print(f"gravando áudio em {arq}...")
         gravarAudioArquivo(arq)
 
-    def enviarHTTP(self, url, content=None, headers=None, method="post"):
+    def enviarHTTP(self, url, content=None, headers=None):
         '''
         O método enviarHTTP envia um pedido de HTTP de forma uniforme com
         informações de debug úteis
@@ -148,12 +124,7 @@ class ClienteLisa:
 
         t_ini = time.time()
         try:
-            if method == "post":
-                resposta = requests.post(url, content, headers=headers)
-            elif method == "delete":
-                resposta = requests.delete(url)
-            elif method == "get":
-                resposta = requests.get(url, content, headers=headers)
+            resposta = requests.post(url, content, headers=headers)
         except requests.exceptions.ConnectionError:
             print(f"Erro! Não foi possível conectar a {url}")
             sys.exit(1)
@@ -168,7 +139,7 @@ class ClienteLisa:
                 print(f"com mimetype {resposta.headers['content-type']}")
             except KeyError:
                 print("sem mimetype")
-            
+
             if resposta.status_code >= 400:
                 print("-------------")
                 print("dump de erro:")
@@ -179,81 +150,73 @@ class ClienteLisa:
                 print("-------------")
 
         if resposta.status_code >= 400:
-            raise IOError("Retorno incorreto")
+            raise ConnectionError(resposta.content.decode("utf-8"))
         return resposta
-            
+
 ajuda = '''
-Inputs possíveis:
+Utilize "responder" seguido de três (ou quatro) argumentos:
 
-enviarAudio: grava e envia um áudio para a Lisa falar
-enviarTexto: envia um texto para a Lisa falar (escrever pela linha de input)
-responderAudio: grava e envia um áudio para a Lisa responder
-responderTexto: envia um texto para a Lisa responder \
-(escrever pela linha de input)
+o argumento 1 significa o tipo de input a ser enviado, podendo ser "texto" ou
+"audio".
 
-Todos esses inputs retornam um número com o índice da resposta que a Lisa gerou
-Para ver a resposta utilize:
+o argumento 2 significa o tipo de output a ser recebido, podendo ser "texto" ou
+"audio".
 
-pegarAudio: pede o áudio de TTS da Lisa de um index e fala
-pegarTexto: pede o texto de um index
+o argumento 3 significa se o input deve ser compreendido de fato, ou somente
+copiado do pedido (útil para, por exemplo, testar se a conexão com o servidor é
+válida).
 
-deletarResposta: deleta a resposta em um index
-'''
+caso o input a ser enviado seja um texto, tudo após o terceiro argumento é
+enviado para o servidor para ser interpretado.
+
+exemplo: responder texto texto true oi lisa, tudo bem contigo?'''
 
 if __name__ == "__main__":
     try:
-        lisa = ClienteLisa("http://localhost:8080", True)
+        lisa = ClienteLisa("http://localhost:8080")
     except IOError:
         print("Erro na criação da cliente")
         sys.exit(-1)
 
     print("Programa de cliente teste da Lisa")
     print("Utilize \"ajuda\" para ver os comandos possíveis")
+
     try:
         while True:
-            lido = input("input: ")
             try:
-                comando = lido.split()[0]
+                lido = input("input: ")
+                comando = lido.split()
             except IndexError:
                 break
-                
-            try:
-                if comando == "enviarAudio":
-                    indice = lisa.responderAudio(None, compreender=False)
-                    print(indice)
-                elif comando == "enviarTexto":
-                    texto = lido[lido.find(comando)+len(comando)+1:]
-                    indice = lisa.responderTexto(texto, compreender=False)
-                    print(indice)
-                elif comando == "responderAudio":
-                    indice = lisa.responderAudio(None)
-                    print(indice)
-                elif comando == "responderTexto":
-                    texto = lido[lido.find(comando)+len(comando)+1:]
-                    indice = lisa.responderTexto(texto)
-                    print(indice)
-                elif comando == "pegarTexto":
-                    indice = lido.split()[1]
-                    texto = lisa.pegarResposta(indice, audio=False)
-                    print(texto.decode("utf-8"))
-                elif comando == "pegarAudio":
-                    indice = lido.split()[1]
-                    audio = lisa.pegarResposta(indice, audio=True)
-                    lisa.falar(audio)
-                elif comando == "deletarResposta":
-                    indice = lido.split()[1]
-                    lisa.deletarResposta(indice)
-                    print("ok")
-                elif comando == "ajuda":
+
+            if len(comando) < 4 or comando[0] != "responder" or \
+                (comando[1] not in ["texto", "audio"]) or \
+                (comando[2] not in ["texto", "audio"]) or \
+                (comando[3] not in ["true", "false"]):
+
+                print(ajuda)
+                continue
+
+            content_type_texto = comando[1] == "texto"
+            accept = "text/plain" if comando[2] == "texto" else "audio/wav"
+            compreender = comando[3]
+
+            if content_type_texto:
+                if len(comando) < 5:
                     print(ajuda)
-                else:
-                    print("Erro, input invalido")
-            except IOError:
+                    continue
+                retorno = lisa.responderTexto(lido[lido.find("false")+6:],
+                    accept, compreender)
+            else:
+                retorno = lisa.responderAudio(accept, compreender)
+
+            if accept == "text/plain":
+                print(retorno.decode("utf-8"))
                 continue
-            except IndexError:
-                print("pegarAudio, pegarTexto e deletarResposta", end=" ")
-                print("precisam de um índice")
-                continue
-        
+
+            lisa.falar(retorno)
+
     except (EOFError, KeyboardInterrupt):
         pass
+    except ConnectionError as e:
+        print(f"erro no processamento do input: {e}")
