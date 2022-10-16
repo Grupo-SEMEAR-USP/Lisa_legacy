@@ -60,17 +60,25 @@ def respostaComLog(mensagem, log=None, status=200, *args):
     
     return flask.Response(mensagem, status, *args)
 
-def receberEntrada(request):
-    if request.content_type == "":
+def receberEntrada(pedido):
+    '''
+    A função receberEntrada apenas recebe, com base no header content_type,
+    a entrada em texto de um pedido da função responder(). Caso o header
+    content-type não esteja presente, ou caso ele não seja suportado, 
+    ValueError e levantado. Caso a entrada seja um áudio, o reconhecimento de
+    áudio é chamado para transformar a entrada em texto.
+    '''
+
+    if pedido.content_type == "":
         raise ValueError()
     
-    if request.content_type == "text/plain":
+    if pedido.content_type == "text/plain":
         #pega o texto todo como uma string
-        return request.get_data().decode("utf-8")
+        return pedido.get_data().decode("utf-8")
 
-    if request.content_type == "audio/wav":
+    if pedido.content_type == "audio/wav":
         #pega o áudio todo como uma sequência de bytes
-        return reconhecerAudio(request.get_data())
+        return reconhecerAudio(pedido.get_data())
 
     raise ValueError()
 

@@ -163,8 +163,8 @@ o argumento 2 significa o tipo de output a ser recebido, podendo ser "texto" ou
 "audio".
 
 o argumento 3 significa se o input deve ser compreendido de fato, ou somente
-copiado do pedido (útil para, por exemplo, testar se a conexão com o servidor é
-válida).
+copiado do pedido, podendo ser "true" ou "false" (útil para, por exemplo, 
+testar se a conexão com o servidor é válida).
 
 caso o input a ser enviado seja um texto, tudo após o terceiro argumento é
 enviado para o servidor para ser interpretado.
