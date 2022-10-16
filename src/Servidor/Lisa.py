@@ -40,5 +40,7 @@ class Lisa:
     
     def responder(self, texto, compreender):
         if not compreender:
+            if texto == "":
+                return "Eu não entendi"
             return texto
         return "Eu não entendi"
