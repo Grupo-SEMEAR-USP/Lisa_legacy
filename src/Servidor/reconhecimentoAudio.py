@@ -1,16 +1,20 @@
 import speech_recognition as sr
+import structlog
 
-
-#TODO:  limpeza de audio
-
+logger = structlog.get_logger("recAudio")
 
 def reconhecerAudio(audio, sample_rate=44100, sample_width=2):
-    rec = sr.Recognizer()
+    try:
+        rec = sr.Recognizer()
+        audiodata = sr.AudioData(audio, sample_rate, sample_width)
 
-    audiodata = sr.AudioData(audio, sample_rate, sample_width)
-    
-    texto = rec.recognize_google(audiodata, language="pt-BR")
-    return texto
+        return rec.recognize_google(audiodata, language="pt-BR")
+    except sr.UnknownValueError:
+        logger.warning("Nada foi reconhecido em um áudio, retornando vazio")
+        return ""
+    except sr.RequestError:
+        logger.error("Erro na request de reconhecimento")
+        raise ConnectionError()
 
 
 if __name__ == "__main__":
