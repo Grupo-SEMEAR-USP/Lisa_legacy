@@ -4,7 +4,7 @@ A Lisa é uma robô humanóide construída do zero pelo grupo SEMEAR EESC/USP, c
 
 
 ## Como testar o código
-Depois de instalar uma versão recente de python 3, utilize em uma linha de comando: `python3 ./scripts/setup_environment.py`, esse programa instalará todas as dependências necessárias para rodar a Lisa. Recomendamos que isso seja feito em um virtual environment, mas isso não é uma obrigação.
+Depois de instalar uma versão recente de python 3, utilize em uma linha de comando: `pip install -r requirements.txt`, esse programa instalará todas as dependências necessárias para rodar a Lisa. Recomendamos que isso seja feito em um virtual environment, mas isso não é uma obrigação.
 
 Depois disso, utilize `python3 ./src/Servidor/main.py` em um terminal para iniciar o servidor da Lisa e `python3 ./src/Cliente/cliente.py` em outro para iniciar o cliente, utilizando a função "responder" para testar as funcionalidades da Lisa
 

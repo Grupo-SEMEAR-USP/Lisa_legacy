@@ -1,6 +1,7 @@
 #todos os arquivos . são ignorados (ex .vscode)
 .*
 !.gitignore
+!.clang-format
 
 #todos os arquivos executáveis compilados não devem ir para o repositório
 build/

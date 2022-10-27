@@ -21,5 +21,9 @@ Neste arquivo citamos os contribuidores que possibilitaram a existência desse p
 - Gabriela Barion Vidal
 - Rodrigo Bragato Piva
 
+## Membros convidados para a programação de baixo nível da ESP32
+- Matheus Henrique Dias Cirillo
+- Vitor Nishimura Vian
+
 ## Agradecimentos
 - Victor Amaral

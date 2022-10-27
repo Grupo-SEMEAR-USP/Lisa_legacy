@@ -10,9 +10,9 @@ Há diversas formas de ajudar um projeto open source como a Lisa, não só inclu
 Para todas as formas de contribuição, é necessário para todos os interessados externos ao grupo SEMEAR que abram uma issue (por meio do github) descrevendo o problema ou ideia de contribuição, seguindo o nosso Modelo de Issue (a ser definido)
 
 ### Contribuições de código
-Para as contribuições de código, é necessário para os não membros do grupo SEMEAR que criem um fork do repositório, realizem commits na branch main no fork, e abram uma pull request da sua branch main para a branch main do código da Lisa
+Para as contribuições de código, é necessário que contribuidores criem um fork do repositório (ou uma branch para os membros do projeto), realizem commits na branch main no fork (ou branch), e abram uma pull request da sua branch main para a branch main do código da Lisa. Além disso, é importante que todo o código siga o padrão de sua linguagem.
 
-Além disso, para as contribuições de código, todos devem seguir um padrão de programação em python:
+#### Padrão de programação em python:
 * Todas as variáveis ou devem ter um nome em português descritivo ou um nome padrão utilizados externamente (df para pandas.DataFrame, por exemplo) ou outro nome padrão explicitado no repositório
     * além disso, todas as variáveis devem ser compostas de letras minúsculas ou "\_", excluindo qualquer acento gráfico
 * Todas as funções devem seguir o padrão lowerCamelCase (a primeira palavra começa com letras minúsculas, qualquer outra palavra começa com letras maiúsculas) e estar em português
@@ -24,7 +24,7 @@ Além disso, para as contribuições de código, todos devem seguir um padrão d
 * Logo depois de toda a declaração de função ou classe, utilize uma string de múltiplas linhas para descrever o que a função ou classe implementa, quais seus argumentos, etc.
     * a única excessão é caso uma classe contenha uma função `__init__` que apenas execute linhas como `self.propriedade = argumento_propriedade` e validação de input
 * Todas as funções que podem ser executadas diretamente devem conter toda a execução de código contida no final, indentado por `if __name__ == "__main__":`
-#### exemplo de código bem formatado
+##### exemplo de código bem formatado
 ```
 from functools import reduce
 
@@ -79,3 +79,23 @@ if __name__ == "__main__":
     print(objeto.calcularVolume())
     objeto.mostrar()
 ```
+
+#### Padrão de programação em C/C++
+* Todas as variáveis ou devem ter um nome em português descritivo ou um nome padrão utilizados externamente (fp para FILE\*, por exemplo) ou outro nome padrão explicitado no repositório
+    * além disso, todas as variáveis devem ser compostas de letras minúsculas ou "\_", excluindo qualquer acento gráfico
+* Todas as funções devem seguir o padrão lowerCamelCase (a primeira palavra começa com letras minúsculas, qualquer outra palavra começa com letras maiúsculas) e estar em português
+* Todas as classes, structs, enums e typedefs devem seguir o padrão UpperCamelCase (todas as palavras, incluindo a primeira, começa com letras maiúsculas) e estar em português
+* Todos os defines devem estar totalmente em letras maiúsculas separadas por "\_"
+* Todas as funções e structs devem ser precedidas de comentários que expliquem seu funcionamento, e, quando comentários de múltiplas linhas forem necessários, é preciso seguir a formatação do exemplo abaixo:
+```
+/*
+ * a struct Complexo representa um número complexo contendo números de ponto
+ * flutuante precisos para a sua representação.
+ */
+typedef struct {
+    double a;
+    double b;
+} Complexo;
+```
+* Para a formatação de estilo de código, como uso de tabs e espaços, limite de caracteres por linha, etc. deve ser usada a ferramenta clang-format com o padrão descrito em .clang-format (no VSCode, basta utilizar ctrl+shift+i tendo a extensão de C/C++ ativada que o código será formatado com o padrão necessário). O padrão utilizado se baseia no padrão do WebKit, com algumas mudanças.
+
