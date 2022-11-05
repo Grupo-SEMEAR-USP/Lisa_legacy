@@ -18,3 +18,4 @@ spacy_streamlit
 flask
 structlog
 waitress
+ibm-watson

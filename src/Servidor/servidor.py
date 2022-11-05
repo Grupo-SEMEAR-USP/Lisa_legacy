@@ -94,6 +94,9 @@ def registrar():
         lisa = Lisa()
     except OverflowError:
         return respostaComLog("Lisas demais", status=507)
+    except (ConnectionError, KeyError):
+        return respostaComLog("Falha na criação da sessão no IBM Watson",
+            status=500)
     
     return respostaComLog(str(lisa.uid), "Retornando registro de Lisa")
 
