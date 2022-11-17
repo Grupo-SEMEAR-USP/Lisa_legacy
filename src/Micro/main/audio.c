@@ -26,7 +26,6 @@ void send_sine_wave(void* _arg){
         if(counter >= 5000){
             counter = 0;
 
-            ESP_LOGI("DAC", "Resseting watchdog counter");
             esp_task_wdt_reset();
         }
 

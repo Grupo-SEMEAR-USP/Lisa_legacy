@@ -6,6 +6,7 @@
 #include "wifi.h"
 #include "audio.h"
 #include "utils.h"
+#include "servo.h"
 
 static const char* main_log_tag = "MAIN";
 
@@ -25,6 +26,14 @@ void app_main(void) {
         configMINIMAL_STACK_SIZE, NULL, 15, &sine_task, 1
     );
     configASSERT(sine_task);
+
+    ESP_LOGI(main_log_tag, "Creating servo task");
+
+    TaskHandle_t servo_task = NULL;
+    xTaskCreate(startServo, "servo", 
+        configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, &servo_task);
+
+    configASSERT(servo_task);
 
 
     ESP_LOGI(main_log_tag, "Entering main loop");
