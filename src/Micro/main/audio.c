@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <esp_log.h>
 
+#include "audio.h"
 
 void setup_audio(void){
     dac_output_enable(DAC_CHANNEL_1);
@@ -13,11 +14,11 @@ void setup_audio(void){
  * send_sin_wave generates a sine wave patten of (aprox.) 220Hz using the DAC
  * when followed by a sleep of 1/24000 s (simulating the default sample rate)
  */
-void send_sine_wave(void* __unused _arg){ 
-    //we know we will not return for a good amount of time, and this is 
+void send_sine_wave(void* _arg){
+    //we know we will not return for a good amount of time, and this is
     //intended, so delete the idle time to keep the watchdog from triggering
 
-    esp_task_wdt_delete(xTaskGetIdleTaskHandleForCPU(1)); 
+    esp_task_wdt_delete(xTaskGetIdleTaskHandleForCPU(1));
 
     double t = 0;
 
