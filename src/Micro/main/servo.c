@@ -10,16 +10,16 @@ void startServo(void* _arg){
         .duty_resolution = LEDC_TIMER_8_BIT,
         .freq_hz = 50,
         .speed_mode = LEDC_LOW_SPEED_MODE,
-        .timer_num = LEDC_TIMER_1,
+        .timer_num = LEDC_TIMER_2,
         .clk_cfg = LEDC_AUTO_CLK,
     };
     ledc_timer_config(&timer_config);
 
     ledc_channel_config_t channel_config = {
-        .gpio_num = GPIO_NUM_23,
-        .channel = LEDC_CHANNEL_1,
+        .gpio_num = GPIO_NUM_20,
+        .channel = LEDC_CHANNEL_2,
         .speed_mode = LEDC_LOW_SPEED_MODE,
-        .timer_sel = LEDC_TIMER_1,
+        .timer_sel = LEDC_TIMER_2,
         .intr_type = LEDC_INTR_DISABLE,
         .duty = 0,
         .hpoint = 0,
