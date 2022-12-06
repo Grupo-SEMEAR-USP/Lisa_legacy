@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from servidor import servidor
+from Lisa import Lisa
 
 
 nivel_logs_dict = {
@@ -125,7 +126,10 @@ if __name__ == "__main__":
     
     configurarLogging(nivel_logs_dict[args.nivel], args.json)
     logger = structlog.get_logger("main")
-    logger.info("Inicializando programa")
+
+    Lisa.setup_api_watson()
+
+    logger.info("Inicializando servidor")
 
     #utiliza o módulo waitress para servir o programa pois o servidor integrado
     #do flask é apenas para desenvolvimento

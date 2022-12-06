@@ -10,3 +10,4 @@ soundfile
 flask
 structlog
 waitress
+ibm-watson
