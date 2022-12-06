@@ -11,3 +11,4 @@ flask
 structlog
 waitress
 ibm-watson
+playsound

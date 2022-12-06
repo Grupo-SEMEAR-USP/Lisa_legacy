@@ -163,7 +163,7 @@ o argumento 2 significa o tipo de output a ser recebido, podendo ser "texto" ou
 "audio".
 
 o argumento 3 significa se o input deve ser compreendido de fato, ou somente
-copiado do pedido, podendo ser "true" ou "false" (útil para, por exemplo, 
+copiado do pedido, podendo ser "true" ou "false" (útil para, por exemplo,
 testar se a conexão com o servidor é válida).
 
 caso o input a ser enviado seja um texto, tudo após o terceiro argumento é
@@ -205,7 +205,9 @@ if __name__ == "__main__":
                 if len(comando) < 5:
                     print(ajuda)
                     continue
-                retorno = lisa.responderTexto(lido[lido.find("false")+6:],
+
+                index_inicio_texto = lido.find(comando[3])+len(comando[3])+1
+                retorno = lisa.responderTexto(lido[index_inicio_texto:],
                     accept, compreender)
             else:
                 retorno = lisa.responderAudio(accept, compreender)
