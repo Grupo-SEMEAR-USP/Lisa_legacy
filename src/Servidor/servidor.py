@@ -146,6 +146,10 @@ def responder(uid):
         return respostaComLog("Erro na conexão para reconhecimento de áudio",
             status=500)
 
+    if entrada == "":
+        compreender = False
+        entrada = "Eu não entendi, pode repetir?"
+    
     #identificando o tipo de dado pedido para retorno
     try:
         tipo_pedido = flask.request.headers["accept"]
