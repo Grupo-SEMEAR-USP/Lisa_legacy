@@ -1,4 +1,4 @@
-# Legged Robotics Workspace 💻
+# SEMEAR: Lisa Workspace 💻
 
 A simplified repository for Legged Robotics Workspace using ROS + Docker. 😎
 
@@ -41,31 +41,7 @@ Follow the steps in the [docs/QUICKSTART_MELODIC.md](docs/QUICKSTART_MELODIC.md)
 # FAQ - Frequently Asked Questions ❓
 [Click here to be redirected to docs/FAQ.md file.](docs/FAQ.md)
 
-# This repository and its users are thankful to
-<table style="display:flex; justify-items:center; justify-content:center; align-items:center; align-content:center;">
-<tbody>
-<tr>
-<td>
-<img src="https://avatars.githubusercontent.com/u/16033414" alt="Lucas Maggi" width="100px" height="auto" style="border-radius:50%; border: 2px solid white; position: relative; top: 0px; z-index:9999;" class="avatar-user">
-<h2>Lucas Maggi</h2> https://github.com/lomcin
-</td>
-<td>
-<img src="https://avatars.githubusercontent.com/u/43577281" alt="Vivian Suzano" width="100px" height="auto" style="border-radius:50%; border: 2px solid white; position: relative; top: 0px; z-index:9999;" class="avatar-user">
-<h2>Vivian Suzano</h2> https://github.com/viviansuzano
-</td>
-<td>
-<img src="https://avatars.githubusercontent.com/u/780327" alt="Gustavo Lahr" width="100px" height="auto" style="border-radius:50%; border: 2px solid white; position: relative; top: 0px; z-index:9999;" class="avatar-user">
-<h2>Gustavo Lahr</h2> https://github.com/glahr
-</td>
-</tr>
-<tr>
-<td>
-<img src="https://avatars.githubusercontent.com/u/44267124" alt="Leonardo dos Santos" width="100px" height="auto" style="border-radius:50%; border: 2px solid white; position: relative; top: 0px; z-index:9999;" class="avatar-user">
-<h2>Leonardo dos Santos</h2> https://github.com/qleonardolp
-</td>
-</tr>
-</tbody>
-</table>
+
 
 
 
