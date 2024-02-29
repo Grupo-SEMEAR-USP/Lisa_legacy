@@ -28,7 +28,7 @@ We **strongly recommend** using the installation of docker from this repository:
 ## Step 1 - Clone this repository
 To download this repository with the dependencies repositories use the following command:
 ```bash
-git clone https://github.com/lomcin/legged_ws.git
+git clone https://github.com/Grupo-SEMEAR-USP/Lisa.git
 ```
 
 **NOTE: If you just have cloned this repository you will need the following steps:**
