@@ -1,29 +1,34 @@
-# Quickstart for Noetic
+# Configuração para o ROS NOETIC - Lisa
 [ [Back to README.md](../README.md) ]
 
-## Previous steps
-Previous steps are available on the [README.md](../README.md) file.
-NOTE: We have only the Go1 workspace that is fully compatible with ROS Noetic.
+## Etapas anteriores
+As etapas anteriores estão disponíveis no arquivo [README.md](../README.md).
+NOTA: Temos apenas o espaço de trabalho Go1 que é totalmente compatível com ROS Noetic.
 
-## Step 2 - Go1 robot workspace in Noetic
+## Passo 1 - ROS Noetic Workspace da Lisa
 
-The following command will prepare all the needed repositories and build the needed docker image with noetic-legged image.
-```bash
-./scripts/prepare_legged_ws.sh noetic-legged
-```
-
-## Step 3 - ROS Noetic Full "LEGGED" version (Ubuntu 18.04)
-**NOTE: Already built if you followed step 2 **
-To easily start a ROS container:
-```bash
-./docker/run.sh noetic-legged
-```
-
-## Step 4 - Build the packages
-Now, inside the docker container let's build all the needed packages.
-
-```If you don't know whether you are inside a container, check if yout current folder and user look something like:``` **user@computer:~/catkin_ws$**
+O comando a seguir preparará todos os repositórios necessários e construirá a imagem docker necessária com imagem noetic-lisa.
 
 ```bash
-./scripts/build_legged_ws.sh
+./scripts/setup_lisa.sh noetic-lisa
 ```
+
+## Passo 2 - Versão completa "LISA" do ROS Noetic (Ubuntu 20.04)
+O comando baixo, via o script **run.sh**, construirá a imagem desejada, no caso da Lisa, e iniciará o container com o ROS Noetic funcional, pronto para ser utilizado. 
+
+```bash
+./docker/run.sh noetic-lisa
+```
+
+## Step 3 - Construindo os Pacotes 
+
+Agora, com o container executando, construiremos os pacotes desejados, os quais foram passados pelo script **setup_lisa**. Este são pacotes externos que só precisam estar disponíveis dentro do container, como o projeto não possui pacotes externos, utilizar este comando não funcioná. 
+
+```Se você não sabe se está dentro de um contêiner, verifique se sua pasta e usuário atuais se parecem com:``` **user@computer:~/catkin_ws$**
+
+```bash
+./scripts/build_generico_ws.sh
+```
+
+# FAQ - Perguntas frequentes❓
+[Clica aqui: docs/FAQ.md file.](docs/FAQ.md)

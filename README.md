@@ -1,14 +1,15 @@
 # SEMEAR: Lisa Workspace 💻
 
-Repositorio oficial de desenvolvimento da Robô Humanoide do SEMEAR, a LISA. 
-Este repositorio conta com container docker com ROS Noetic. 😎
+Repositorio oficial de desenvolvimento da Robô Humanoide do SEMEAR, a LISA.  Este repositorio conta com container docker com ROS Noetic. 😎
 
-What is *contained* in this repository?
-* Dockerfiles for some of ROS distros with the needed build instructions.
-* Scripts that makes docker a little bit easier.
+O criado do deste modelo de trabalho ROS com Docker foi o Lucas (pensa num mago), criou para o Laboratório LEGGED, depois anexarei um link para o repositório original. A ideia que tive foi generalizar a ideia e aplica-lá para projeto mais generalistas, isso está em construção, um dia termino ...
+
+O que está *contido* neste repositório?
+* Dockerfiles para algumas distribuições ROS com as instruções de construção necessárias.
+* Scripts que tornam o docker um pouco mais fácil.
 
 # [Imagens Docker](docs/IMAGES.md)
-Vocêo pode verificar as Imagens Docker Disponíveis. Verificar: [docs/IMAGES.md](docs/IMAGES.md).
+Você pode verificar as Imagens Docker Disponíveis. Verificar: [docs/IMAGES.md](docs/IMAGES.md).
 
 
 # Passo a Passo 🚀
@@ -16,6 +17,7 @@ Vocêo pode verificar as Imagens Docker Disponíveis. Verificar: [docs/IMAGES.md
 ## Passo 1 - Instalando Git e Docker
 
 ### GIT 🌳
+
 ```bash
 sudo apt install -y git
 ```
@@ -33,12 +35,30 @@ Para baixar o repositório, execute o comando abaixo:
 git clone https://github.com/Grupo-SEMEAR-USP/Lisa.git
 ```
 
-**NOTE: If you just have cloned this repository you will need the following steps:**
+## Passo 3 - ROS Noetic Workspace da Lisa
 
-## Para executar o ROS Noetic (Ubuntu 20.04) [recomendamos] 👈
-Siga os seguintes passo [docs/QUICKSTART_NOETIC.md](docs/QUICKSTART_NOETIC.md).
-## Para executar o ROS Melodic (Ubuntu 18.04)
-Siga os seguintes passo [docs/QUICKSTART_MELODIC.md](docs/QUICKSTART_MELODIC.md).
+O comando a seguir preparará todos os repositórios necessários e construirá a imagem docker necessária com imagem noetic-lisa.
+
+```bash
+./scripts/setup_lisa.sh noetic-lisa
+```
+
+## Passo 4 - Versão completa "LISA" do ROS Noetic (Ubuntu 20.04)
+O comando baixo, via o script **run.sh**, construirá a imagem desejada, no caso da Lisa, e iniciará o container com o ROS Noetic funcional, pronto para ser utilizado. 
+
+```bash
+./docker/run.sh noetic-lisa
+```
+
+## Step 5 - Construindo os Pacotes 
+
+Agora, com o container executando, construiremos os pacotes desejados, os quais foram passados pelo script **setup_lisa**. Este são pacotes externos que só precisam estar disponíveis dentro do container, como o projeto não possui pacotes externos, utilizar este comando não funcioná. 
+
+```Se você não sabe se está dentro de um contêiner, verifique se sua pasta e usuário atuais se parecem com:``` **user@computer:~/catkin_ws$**
+
+```bash
+./scripts/build_generico_ws.sh
+```
 
 # FAQ - Perguntas frequentes❓
 [Clica aqui: docs/FAQ.md file.](docs/FAQ.md)
