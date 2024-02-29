@@ -2,7 +2,7 @@ FROM osrf/ros:noetic-desktop-focal
 
 # Avoiding interactive problems when updating
 ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=America/Recife
+ENV TZ=America/Sao_Paulo
 
 RUN apt update && apt upgrade -y
 
