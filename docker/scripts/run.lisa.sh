@@ -19,6 +19,8 @@ if [[ $PWD = *LISA ]]; then
     --user lisa \
     --network=host \
     --ipc=host \
+    --device /dev/video0 \
+    -v /dev/video0:/dev/video0 \
     -v /dev/dri:/dev/dri \
     -v $PWD/lisa_ws:/home/lisa/lisa_ws \
     -v $PWD/lisa_desktop:/home/lisa/lisa_desktop \
