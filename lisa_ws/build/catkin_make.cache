@@ -1,2 +1,2 @@
-
+my_first_package
 -DCATKIN_DEVEL_PREFIX=/home/lisa/lisa_ws/devel -DCMAKE_INSTALL_PREFIX=/home/lisa/lisa_ws/install -G Unix Makefiles
