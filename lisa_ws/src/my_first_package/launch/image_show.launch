@@ -1,0 +1,5 @@
+<launch>
+
+<node name=get_cam_image_node pkg=my_first_package type=get_image_node.py output="screen" respawn="True"/>
+
+</launch>
