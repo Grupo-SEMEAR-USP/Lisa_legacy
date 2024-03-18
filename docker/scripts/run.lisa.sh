@@ -4,7 +4,7 @@
 # Here you will find the commands to inicialize the docker image the rigth way
 # Aqui você vai encontrar os comandos para inicializar a imagem docker do jeito bom
 
-if [[ $PWD = *LISA ]]; then
+if [[ $PWD = *Lisa ]]; then
 
     #                       Configs para inicialização do container
     #                                -it    (Terminal interativo)
@@ -27,9 +27,9 @@ if [[ $PWD = *LISA ]]; then
     -e DISPLAY=$DISPLAY \
     lisa:noetic
 
-elif [[ ! $PWD = *spot-robot/docker ]]; then
-    echo -e "You must be in 'LISA' directory to run this command."
-    echo -e "Você deve estar na pasta 'LISA' para rodar esse comando."
+elif [[ ! $PWD = *Lisa/docker ]]; then
+    echo -e "You must be in 'Lisa' directory to run this command."
+    echo -e "Você deve estar na pasta 'Lisa' para rodar esse comando."
     return 1
 fi
 
