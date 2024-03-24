@@ -4,15 +4,21 @@ import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
-nodeName, topicName = 'get_cam_image_node', '/cam_image'
+nodeName, topicName = 'get_image_node', '/cam_image'
+
 
 cap = cv2.VideoCapture(0)
-print(cap.isOpened())
+if cap.isOpened():
+    rospy.loginfo("Camera accessed successfully")
+else:
+    rospy.logerr("Camera cannot be accessed")
 bridge = CvBridge()
+
 
 def get_image():
     pub = rospy.Publisher(topicName, Image, queue_size = 1)
     rospy.init_node(nodeName, anonymous = True)
+    rospy.loginfo("get_image_node started")
     ratePublisher = rospy.Rate(10)
 
     while not rospy.is_shutdown():

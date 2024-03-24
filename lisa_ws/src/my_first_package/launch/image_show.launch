@@ -1,5 +1,10 @@
 <launch>
+    <!-- Launch Node 1 -->
+    <node name="find_faces_node" pkg="my_first_package" type="find_faces_node.py" output="screen" />
 
-<node name=get_cam_image_node pkg=my_first_package type=get_image_node.py output="screen" respawn="True"/>
+    <!-- Launch Node 2 -->
+    <node name="get_image_node" pkg="my_first_package" type="get_image_node.py" output="screen" />
 
+    <!-- Launch Node 3 -->
+    <node name="show_image_node" pkg="my_first_package" type="show_image_node.py" output="screen" />
 </launch>

@@ -4,7 +4,7 @@ import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
-nodeName, topicName = 'show_image_node', '/cam_image'
+nodeName, topicName = 'show_image_node', '/face_image'
 
 bridge = CvBridge()
 
