@@ -10,7 +10,7 @@ bridge = CvBridge()
 
 def callbackfunc(message):
     frame = bridge.imgmsg_to_cv2(message)
-    cv2.imshow("Camera", frame)
+    cv2.imshow("Rosto", frame)
     cv2.waitKey(1)
 
 rospy.init_node(nodeName, anonymous=True)
