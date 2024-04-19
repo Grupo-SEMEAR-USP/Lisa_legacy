@@ -4,7 +4,7 @@
 # Here you will find the commands to inicialize the docker image the rigth way
 # Aqui você vai encontrar os comandos para inicializar a imagem docker do jeito bom
 
-if [[ $PWD = *LISA ]]; then
+if [[ $PWD = *Lisa ]]; then
 
     #                       Configs para inicialização do container
     #                                -it    (Terminal interativo)
