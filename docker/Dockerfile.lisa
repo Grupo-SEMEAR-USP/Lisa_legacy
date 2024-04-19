@@ -58,7 +58,3 @@ COPY config/entrypoint.sh /entrypoint.sh
 COPY config/bashrc /home/${USERNAME}/.bashrc
 ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
 CMD [ "bash" ]
-
-# RUN apt install wget git build-essential -y
-# RUN apt-get install python3-catkin-tools -y
-# RUN apt install liburdfdom-dev liboctomap-dev libassimp-dev
