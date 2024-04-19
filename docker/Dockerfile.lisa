@@ -1,6 +1,13 @@
 # Adicionando ROS noetic desktop image como base
 FROM osrf/ros:noetic-desktop-full
 
+# Evitando problemas com atividades interativas
+    # Assim evita aquelas confirmações de instalação de pacotes que podem aparecer.
+    # Basicamente a gente seta que nosso sistema atual é não interativo
+# Descomente as linhas abaixo caso haja problemas relacionados
+# ARG DEBIAN_FRONTEND=noninteractive
+# ENV TZ=America/Sao_Paulo
+
 # Setando usuário no container
 ARG USERNAME=lisa
 ARG USER_UID=1000
@@ -21,20 +28,37 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalando software e pacotes, qualquer novo pacote adicionem aqui
+## Uttils
+RUN apt-get update \
+    && apt-get install -y git-all
+
+## Instalando rviz
 RUN apt-get update \
     && apt-get install -y rviz\
     && rm -rf /var/lib/apt/lists/*
 
-# Instalando Pacotes de Python
+## Instalando biblicotecas de python
 RUN apt-get update \
     && apt-get install -y python3 python3-pip \
     && apt-get install -y python-numpy \
     && rm -rf /var/lib/apt/lists/*
+
 RUN pip install opencv-python
 
+RUN apt-get update \
+    && apt-get install ffmpeg
+
+## Media Pipe
+RUN git clone --depth 1 https://github.com/google/mediapipe.git
+RUN cd mediapipe \
+    && bash setup_opencv.sh
 
 # Configurando o entrypoint script e bashrc
 COPY config/entrypoint.sh /entrypoint.sh
 COPY config/bashrc /home/${USERNAME}/.bashrc
 ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
 CMD [ "bash" ]
+
+# RUN apt install wget git build-essential -y
+# RUN apt-get install python3-catkin-tools -y
+# RUN apt install liburdfdom-dev liboctomap-dev libassimp-dev
