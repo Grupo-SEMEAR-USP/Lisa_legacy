@@ -1,0 +1,32 @@
+#include <AccelStepper.h>
+
+// Definições de pinos para o motor
+#define STEP_PIN 14
+#define DIR_PIN 12
+
+// Criação do objeto stepper
+AccelStepper stepper(1, STEP_PIN, DIR_PIN); // (Tipo do motor: driver, Pino de pulso, Pino de direção)
+
+void setup() {
+  Serial.begin(9600); // Inicia comunicação serial
+  Serial.println("Inicialização");
+
+  // Configurações do motor
+  stepper.setMaxSpeed(1000); // Velocidade máxima em passos por segundo
+  stepper.setAcceleration(500); // Aceleração em passos por segundo ao quadrado
+
+  // Define a velocidade de movimento do motor
+  stepper.setSpeed(500); // 500 passos por segundo
+}
+
+void loop() {
+  // Movimenta o motor a uma velocidade constante
+  stepper.runSpeed();
+
+  // Inverte a direção a cada 5000 milissegundos (5 segundos)
+  static unsigned long lastMillis = 0;
+  if (millis() - lastMillis > 5000) {
+    stepper.setSpeed(-stepper.speed()); // Inverte a direção
+    lastMillis = millis();
+  }
+}

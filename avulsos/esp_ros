@@ -1,0 +1,41 @@
+#include <ros.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Empty.h>
+
+ros::NodeHandle nh;
+
+void messageCb(const std_msgs::Empty& toggle_msg){
+  // Toggle the LED on pin 2
+  digitalWrite(2, HIGH - digitalRead(2));   // Toggle the state of the LED
+}
+
+ros::Subscriber<std_msgs::Empty> sub("toggle_led", messageCb);
+
+std_msgs::String str_msg;
+ros::Publisher chatter("chatter", &str_msg);
+
+char hello[13] = "hello world!";
+
+void setup() {
+  pinMode(2, OUTPUT);  // Set the LED pin as output
+  nh.initNode();
+  nh.advertise(chatter);
+  nh.subscribe(sub);
+}
+
+void loop() {
+  str_msg.data = hello;
+  chatter.publish(&str_msg);
+  nh.spinOnce();
+  delay(500); // Delay to slow down the loop for readability
+}
+// void setup() {
+//   // Inicia a comunicação serial a 9600 bits por segundo:
+//   Serial.begin(9600);
+// }
+
+// void loop() {
+//   // Envia "Hello, world!" pela porta serial
+//   Serial.println("Hello, world!");
+//   delay(1000);
+// }
