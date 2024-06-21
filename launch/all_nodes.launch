@@ -1,0 +1,10 @@
+<launch>
+  <!-- Remove the roscore node -->
+  
+  <node name="cam_pub" pkg="estrutura" type="cam_pub.py" output="screen" />
+  <node name= "display_node" pkg="estrutura" type="display_node.py" output="screen" />
+  <node name="contador_service" pkg="estrutura" type="contador_service.py" output="screen" />
+  <node name="gesto_service" pkg="estrutura" type="gesto_service.py" output="screen" />
+  <node name="reconhecimento_rosto_service" pkg="estrutura" type="reconhecimento_rosto_service.py" output="screen" />
+  <node name="controlador" pkg="estrutura" type="controlador.py" output="screen" />
+</launch>
