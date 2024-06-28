@@ -3,7 +3,6 @@ import mediapipe as mp
 import os
 import numpy as np
 from time import sleep
-from pynput.keyboard import Controller
 
 BRANCO = (255, 255, 255)
 PRETO = (0, 0, 0)
@@ -25,7 +24,6 @@ camera.set(cv2.CAP_PROP_FRAME_HEIGHT, resolucao_y)
 offset = 50
 contador = 0
 texto = '>'
-teclado = Controller()
 img_quadro = np.ones((resolucao_y, resolucao_x, 3), np.uint8) * 255
 cor_pincel = (255, 0, 0)
 espessura_pincel = 7
