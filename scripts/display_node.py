@@ -17,10 +17,11 @@ gesture_mapping = {
 }
 
 timeout_duration = rospy.Duration(10)  # Duração do timeout em segundos
-last_message_time = None
-current_process = None
-background_process = None
+last_message_time = None # tempo da última mensagem recebida
+current_process = None # processo atual que exibe um GIF
+background_process = None # processo de fundo que exibe o GIF
 
+# a função aqui serve pra exibir o gif com base no gesto que ela recebe
 def play_gif_with_mpv(gesture):
     global current_process
     try:
@@ -39,8 +40,8 @@ def play_gif_with_mpv(gesture):
         # Certifique-se de que a variável DISPLAY está configurada para :0
         os.environ['DISPLAY'] = ':0'
 
-        # Comando para executar o mpv com um método de saída de vídeo específico
-        command = ['mpv', '--fullscreen', '--loop=inf', '--vo=x11', gif_path]
+        # Comando para executar o mpv com um método de saída de vídeo específico e rotação de 180 graus
+        command = ['mpv', '--fullscreen', '--loop=inf', '--vo=x11', '--video-rotate=180', gif_path]
 
         # Termina o processo anterior, se houver
         if current_process:
@@ -70,8 +71,8 @@ def play_background_gif():
         # Certifique-se de que a variável DISPLAY está configurada para :0
         os.environ['DISPLAY'] = ':0'
 
-        # Comando para executar o mpv com um método de saída de vídeo específico
-        command = ['mpv', '--fullscreen', '--loop=inf', '--vo=x11', gif_path]
+        # Comando para executar o mpv com um método de saída de vídeo específico e rotação de 180 graus
+        command = ['mpv', '--fullscreen', '--loop=inf', '--vo=x11', '--video-rotate=180', gif_path]
 
         # Executa o comando apenas se o processo de fundo não estiver em execução
         if not background_process:
