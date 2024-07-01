@@ -214,7 +214,7 @@ TEMP_DIR=$(mktemp -d)
 
 # Clonar o repositório diretamente no diretório temporário
 echo "Clonando o repositório..."
-if ! git clone [git@github.com:Grupo-SEMEAR-USP/Lisa.git](https://github.com/Grupo-SEMEAR-USP/Lisa.git) "$TEMP_DIR"; then
+if ! git clone https://github.com/Grupo-SEMEAR-USP/Lisa.git "$TEMP_DIR"; then
     echo "Erro ao clonar o repositório. Verifique a URL e sua conexão com a internet."
     exit 1
 fi
