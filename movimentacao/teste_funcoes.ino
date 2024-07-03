@@ -49,25 +49,14 @@ void setup() {
 
   // Configurações dos motores de passo
   configureStepper(stepperDIR, SLEEP_PIN1, 300, 500);
-  configureStepper(stepperESQ, SLEEP_PIN2, 300, 175);
+  configureStepper(stepperESQ, SLEEP_PIN2, 300, 500);
   configureStepper(stepperNAO, SLEEP_PIN3, 1000, 500);
   configureStepper(stepperBASE, SLEEP_PIN4, 1000, 500);
 }
 
 void loop() {
-  // Move para 60 passos (horário)
-  virar120(stepperDIR, SLEEP_PIN1, 1);
-  
-  // Variar 30 graus (horário e anti-horário) 4 vezes
-  for (int i = 0; i < 4; i++) {
-    variar30Graus(stepperDIR, SLEEP_PIN1, 1);  // Horário
-    variar30Graus(stepperDIR, SLEEP_PIN1, -1); // Anti-horário
-  }
-
-  // Voltar para 0 (anti-horário)
-  voltarPara0(stepperDIR, SLEEP_PIN1);
-  
-  stepperSIM.runSpeed();
+  //cumprimentar(stepperDIR);
+  feliz(stepperESQ,stepperDIR);
 }
 
 void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float acceleration) {
@@ -80,6 +69,14 @@ void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float
 void virar120(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
   stepper.move(graus(120) * direcao);
+  while (abs(stepper.distanceToGo()) > erro) {
+    stepper.run();
+  }
+  Serial.println("Motor moved 60 steps in direction: " + String(direcao));
+}
+void virar90(AccelStepper &stepper, int sleepPin, int direcao) {
+  digitalWrite(sleepPin, HIGH);
+  stepper.move(graus(90) * direcao);
   while (abs(stepper.distanceToGo()) > erro) {
     stepper.run();
   }
@@ -101,7 +98,7 @@ void virar45(AccelStepper &stepper, int sleepPin, int direcao) {
   }
   Serial.println("Motor moved 60 steps in direction: " + String(direcao));
 }
-void variar30Graus(AccelStepper &stepper, int sleepPin, int direcao) {
+void virar30(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
   stepper.move(graus(30) * direcao);
   while (abs(stepper.distanceToGo()) > erro) {
@@ -109,7 +106,6 @@ void variar30Graus(AccelStepper &stepper, int sleepPin, int direcao) {
   }
   Serial.println("Motor moved 30 steps in direction: " + String(direcao));
 }
-
 void virar15(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
   stepper.move(graus(15) * direcao);
@@ -126,4 +122,68 @@ void voltarPara0(AccelStepper &stepper, int sleepPin) {
     stepper.run();
   }
   Serial.println("Motor moved back to 0 steps");
+}
+
+void cumprimentar(AccelStepper &stepperDIR) {
+  // Move para 60 graus (horário)
+  virar120(stepperDIR, SLEEP_PIN1, 1);
+
+  // Variar 30 graus (horário e anti-horário) 4 vezes
+  for (int i = 0; i < 4; i++) {
+    virar30(stepperDIR, SLEEP_PIN1,1);  // Horário
+    virar30(stepperDIR, SLEEP_PIN1,-1); // Anti-horário
+  }
+
+  // Voltar para 0 (anti-horário)
+  voltarPara0(stepperDIR, SLEEP_PIN1);
+}
+
+void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
+
+  for (int i = 0; i < 4; i++) {
+    virar120(stepperESQ, SLEEP_PIN2, 1);
+    virar120(stepperDIR, SLEEP_PIN1, -1);
+    voltarPara0(stepperESQ, SLEEP_PIN2);
+    voltarPara0(stepperDIR, SLEEP_PIN1);
+
+  }
+}
+
+void sapeca(AccelStepper &stepperBASE, AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
+
+  for (int i = 0; i < 4; i++) {
+    virar120(stepperESQ, SLEEP_PIN2, 1);
+    virar120(stepperDIR, SLEEP_PIN1, -1);
+    virar60(stepperBASE, SLEEP_PIN4,1);  // Horário
+    virar60(stepperBASE, SLEEP_PIN4,-1); // Anti-horário
+    voltarPara0(stepperESQ, SLEEP_PIN2);
+    voltarPara0(stepperDIR, SLEEP_PIN1);
+
+  }
+  voltarPara0(stepperBASE, SLEEP_PIN4);
+}
+
+void bravinha(AccelStepper &stepperNAO){
+  for (int i = 0; i < 4; i++) {
+    virar60(stepperNAO, SLEEP_PIN3, 1);
+    virar60(stepperNAO, SLEEP_PIN3, -1);
+  }
+}
+
+void sim(AccelStepper &stepperSIM){
+  for (int i = 0; i < 4; i++) {
+    stepperSIM.moveTo(1000);
+    stepperSIM.runToPosition();
+    delay(1000);
+    stepperSIM.moveTo(0);
+    stepperSIM.runToPosition();
+    delay(1000);
+  }
+}
+
+void vitoria(AccelStepper &stepperBASE){
+  for (int i = 0; i < 4; i++) {
+    virar90(stepperBASE, SLEEP_PIN4, 1);
+    virar90(stepperBASE, SLEEP_PIN4, -1);
+  }
 }
