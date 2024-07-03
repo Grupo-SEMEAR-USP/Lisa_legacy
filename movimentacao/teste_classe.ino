@@ -3,6 +3,27 @@
 #define erro 0  // Define a margem de erro como 5 passos
 
 // Definições de pinos para o motor da cabeça
+#define STEP_PIN1 12
+#define DIR_PIN1 14
+#define SLEEP_PIN1 13
+
+#define STEP_PIN2 2
+#define DIR_PIN2 4
+#define SLEEP_PIN2 32
+
+#define STEP_PIN3 23
+#define DIR_PIN3 21
+#define SLEEP_PIN3 33
+
+#define STEP_PIN4 25
+#define DIR_PIN4 27
+#define SLEEP_PIN4 26
+
+#define IN41 5
+#define IN42 18
+#define IN43 19
+#define IN44 21
+
 #define passosPorRotacao 200
 #define microsteps 1
 
@@ -12,7 +33,7 @@ long graus(float graus) {
 
 class Motor {
 public:
-  Motor(int stepPin, int dirPin, int sleepPin, int interfaceType = 1) 
+  Motor(int stepPin, int dirPin, int sleepPin, int interfaceType = 1)
     : stepper(interfaceType, stepPin, dirPin), sleepPin(sleepPin) {
     pinMode(sleepPin, OUTPUT);
     digitalWrite(sleepPin, LOW);
@@ -72,7 +93,7 @@ protected:
 
 class MotorSIM : public Motor {
 public:
-  MotorSIM(int in1, int in2, int in3, int in4) 
+  MotorSIM(int in1, int in2, int in3, int in4)
     : Motor(0, 0, 0, 8), stepperSIM(8, in1, in3, in2, in4) {
     // Não há pino de sleep para este motor
   }
@@ -107,6 +128,10 @@ protected:
   AccelStepper stepperSIM;
 };
 
+// Declaração das funções cumprimentar e feliz
+void cumprimentar(Motor &motor);
+void feliz(Motor &motorESQ, Motor &motorDIR);
+
 // Instanciação dos objetos de motor
 Motor stepperDIR(STEP_PIN1, DIR_PIN1, SLEEP_PIN1);
 Motor stepperESQ(STEP_PIN2, DIR_PIN2, SLEEP_PIN2);
@@ -125,14 +150,14 @@ void setup() {
 }
 
 void loop() {
-  cumprimentar(stepperESQ);
-  //feliz(stepperESQ, stepperDIR);
+  cumprimentar(stepperDIR);
+  // feliz(stepperESQ, stepperDIR);
 }
 
 void cumprimentar(Motor &motor) {
   // Move para 60 graus (horário)
-  motor.virar60(1);
-
+  motor.virar120(1);
+cumprimentar
   // Variar 30 graus (horário e anti-horário) 4 vezes
   for (int i = 0; i < 4; i++) {
     motor.virar30(1);  // Horário
@@ -144,15 +169,10 @@ void cumprimentar(Motor &motor) {
 }
 
 void feliz(Motor &motorESQ, Motor &motorDIR) {
-
   for (int i = 0; i < 4; i++) {
-    motorESQ.virar60(1);
-    motorDIR.virar60();
+    motorESQ.virar60(-1); // Motor esquerdo anti-horário
+    motorDIR.virar60(1);  // Motor direito horário
     motorESQ.voltarPara0();
     motorDIR.voltarPara0();
-
   }
-
 }
-
-
