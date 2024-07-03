@@ -85,7 +85,22 @@ void virar120(AccelStepper &stepper, int sleepPin, int direcao) {
   }
   Serial.println("Motor moved 60 steps in direction: " + String(direcao));
 }
-
+void virar60(AccelStepper &stepper, int sleepPin, int direcao) {
+  digitalWrite(sleepPin, HIGH);
+  stepper.move(graus(60) * direcao);
+  while (abs(stepper.distanceToGo()) > erro) {
+    stepper.run();
+  }
+  Serial.println("Motor moved 60 steps in direction: " + String(direcao));
+}
+void virar45(AccelStepper &stepper, int sleepPin, int direcao) {
+  digitalWrite(sleepPin, HIGH);
+  stepper.move(graus(45) * direcao);
+  while (abs(stepper.distanceToGo()) > erro) {
+    stepper.run();
+  }
+  Serial.println("Motor moved 60 steps in direction: " + String(direcao));
+}
 void variar30Graus(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
   stepper.move(graus(30) * direcao);
@@ -93,6 +108,15 @@ void variar30Graus(AccelStepper &stepper, int sleepPin, int direcao) {
     stepper.run();
   }
   Serial.println("Motor moved 30 steps in direction: " + String(direcao));
+}
+
+void virar15(AccelStepper &stepper, int sleepPin, int direcao) {
+  digitalWrite(sleepPin, HIGH);
+  stepper.move(graus(15) * direcao);
+  while (abs(stepper.distanceToGo()) > erro) {
+    stepper.run();
+  }
+  Serial.println("Motor moved 60 steps in direction: " + String(direcao));
 }
 
 void voltarPara0(AccelStepper &stepper, int sleepPin) {
