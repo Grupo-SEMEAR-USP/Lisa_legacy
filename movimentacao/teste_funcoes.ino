@@ -4,31 +4,32 @@
 #define erro 5  
 
 // Definições de pinos para o motor da cabeça
-// DIREITA
+//DIREITA
 #define STEP_PIN1 12 
 #define DIR_PIN1 14
 #define SLEEP_DIREITA 13
 
-// ESQUERDA
-#define STEP_PIN2 4
-#define DIR_PIN2 2
-#define SLEEP_ESQUERDA 32
+//ESQUERDA
+#define STEP_PIN2 22
+#define DIR_PIN2  23
+#define SLEEP_ESQUERDA 33 //16 //34 35 DONT (1 proibido usar trava serial)
 
-// NAO
-#define STEP_PIN3 23
-#define DIR_PIN3 22
-#define SLEEP_NAO 33
+//NAO
+#define STEP_PIN3 2
+#define DIR_PIN3 4
+#define SLEEP_NAO 32 //17
 
-// BASE
+//BASE
 #define STEP_PIN4 25
-#define DIR_PIN4 27
+#define DIR_PIN4 27 
 #define SLEEP_BASE 26
 
-// SIM
+//SIM
 #define IN41 5
 #define IN42 18
 #define IN43 19
 #define IN44 21
+
 
 // Definição dos passos por rotação e microsteps
 #define passosPorRotacao 200
@@ -69,15 +70,26 @@ void setup() {
   Serial.begin(115200);
 
   // Configurações dos motores de passo
-  configureStepper(stepperDIR, SLEEP_DIREITA, 300, 500);
-  configureStepper(stepperESQ, SLEEP_ESQUERDA, 300, 500);
-  configureStepper(stepperNAO, SLEEP_NAO, 1000, 500);
-  configureStepper(stepperBASE, SLEEP_BASE, 1000, 500);
+  configureStepper(stepperDIR, SLEEP_DIREITA, 300, 700);
+  configureStepper(stepperESQ, SLEEP_ESQUERDA, 300, 700);
+  configureStepper(stepperNAO, SLEEP_NAO, 300, 500);
+  configureStepper(stepperBASE, SLEEP_BASE, 300, 500);
+  stepperSIM.setMaxSpeed(1000);
+  stepperSIM.setAcceleration(500);
+  // feliz(stepperESQ, stepperDIR);
+  // digitalWrite(SLEEP_ESQUERDA, LOW);
+  // digitalWrite(SLEEP_DIREITA, LOW);
 }
 
 void loop() {
-    sapeca(stepperNAO, stepperESQ, stepperDIR);
-    // feliz(stepperESQ, stepperDIR);
+  //cumprimentar(stepperESQ);
+  sapeca(stepperSIM, stepperESQ, stepperDIR);
+  //sim(stepperSIM);
+  //feliz(stepperESQ, stepperDIR);
+  //digitalWrite(SLEEP_ESQUERDA, LOW);
+  //digitalWrite(SLEEP_DIREITA, LOW);
+  // stepperSIM.setSpeed(500);
+  // stepperSIM.runSpeed(); 
   
 }
 
@@ -88,7 +100,14 @@ void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float
   pinMode(sleepPin, OUTPUT);
   digitalWrite(sleepPin, LOW);
 }
-
+void virar180(AccelStepper &stepper, int sleepPin, int direcao) {
+  digitalWrite(sleepPin, HIGH);
+  stepper.move(graus(180) * direcao);
+  while (abs(stepper.distanceToGo()) > erro) {
+    stepper.run();
+  }
+  Serial.println("Motor moved 120 steps in direction: " + String(direcao));
+}
 // Função para mover o motor em 120 graus
 void virar120(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
@@ -155,38 +174,58 @@ void voltarPara0(AccelStepper &stepper, int sleepPin) {
   Serial.println("Motor moved back to 0 steps");
 }
 
+
 // Função para cumprimentar movendo o motor em 120 graus, variando 30 graus e retornando a 0
-void cumprimentar(AccelStepper &stepperDIR) {
-  virar120(stepperDIR, SLEEP_DIREITA, 1);
-  for (int i = 0; i < 4; i++) {
-    virar30(stepperDIR, SLEEP_DIREITA, 1);  // Horário
-    virar30(stepperDIR, SLEEP_DIREITA, -1); // Anti-horário
+void cumprimentar(AccelStepper &stepperESQ) {
+  
+  virar120(stepperESQ, SLEEP_ESQUERDA, 1);
+  for (int i = 0; i < 2; i++) {
+    stepperESQ.setMaxSpeed(500);
+    stepperESQ.setAcceleration(1000);
+    virar30(stepperESQ, SLEEP_ESQUERDA, 1);  // Horário
+    virar30(stepperESQ, SLEEP_ESQUERDA, -1); // Anti-horário
   }
-  voltarPara0(stepperDIR, SLEEP_DIREITA);
+  stepperESQ.setMaxSpeed(300);
+  stepperESQ.setAcceleration(700);
+  voltarPara0(stepperESQ, SLEEP_ESQUERDA);
+  digitalWrite(SLEEP_ESQUERDA, LOW);
+
 }
 
 // Função para executar movimentos de felicidade com dois motores
 void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 2; i++) {
     virar120(stepperESQ, SLEEP_ESQUERDA, 1);
     virar120(stepperDIR, SLEEP_DIREITA, -1);
+    stepperESQ.setMaxSpeed(300);
+    stepperESQ.setAcceleration(1000);
+    stepperDIR.setMaxSpeed(300);
+    stepperDIR.setAcceleration(1000);
     voltarPara0(stepperESQ, SLEEP_ESQUERDA);
     voltarPara0(stepperDIR, SLEEP_DIREITA);
   }
+stepperESQ.setMaxSpeed(300);
+stepperESQ.setAcceleration(700);
+stepperDIR.setMaxSpeed(300);
+stepperDIR.setAcceleration(700);  
+digitalWrite(SLEEP_DIREITA, LOW);
+digitalWrite(SLEEP_ESQUERDA, LOW);
 }
 
+
+
 // Função para executar movimentos de "sapeca"
-void sapeca(AccelStepper &stepperNAO, AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
+void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &stepperDIR ) {
+  // stepperSIM.setSpeed(500);
+  // stepperSIM.runSpeed(); 
   for (int i = 0; i < 4; i++) {
     virar120(stepperESQ, SLEEP_ESQUERDA, 1);
     virar120(stepperDIR, SLEEP_DIREITA, -1);
-    virar60(stepperNAO, SLEEP_NAO, 1);  // Horário
-    voltarPara0(stepperNAO, SLEEP_NAO);
-    virar60(stepperNAO, SLEEP_NAO, -1); // Anti-horário
     voltarPara0(stepperESQ, SLEEP_ESQUERDA);
     voltarPara0(stepperDIR, SLEEP_DIREITA);
+    sim(stepperSIM);
   }
-  voltarPara0(stepperNAO, SLEEP_NAO);
+
 }
 
 // Função para executar movimentos "bravinha"
@@ -199,13 +238,13 @@ void bravinha(AccelStepper &stepperNAO) {
 
 // Função para executar movimentos de "sim"
 void sim(AccelStepper &stepperSIM) {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 2; i++) {
     stepperSIM.moveTo(1000);
     stepperSIM.runToPosition();
-    delay(1000);
+    delay(100);
     stepperSIM.moveTo(0);
     stepperSIM.runToPosition();
-    delay(1000);
+    delay(100);
   }
 }
 
