@@ -7,13 +7,13 @@
 #define SLEEP_PIN1 13
 
 //ESQUERDA
-#define STEP_PIN2 2
-#define DIR_PIN2 4
+#define STEP_PIN2 4
+#define DIR_PIN2 2
 #define SLEEP_PIN2 32
 
 //NAO
 #define STEP_PIN3 23
-#define DIR_PIN3 21
+#define DIR_PIN3 22
 #define SLEEP_PIN3 33
 
 //BASE
@@ -34,7 +34,7 @@ AccelStepper stepperNAO(1, STEP_PIN3, DIR_PIN3);
 AccelStepper stepperBASE(1, STEP_PIN4, DIR_PIN4);
 
 // Ajuste aqui a configuração conforme necessário
-AccelStepper stepperSIM(AccelStepper::HALF4WIRE, IN41, IN43, IN42, IN44);
+AccelStepper stepperSIM(8, IN41, IN43, IN42, IN44);
 
 void setup() {
   // Inicia a comunicação serial com 115200 baud rate.
@@ -58,11 +58,12 @@ void setup() {
 
   stepperBASE.setMaxSpeed(1000);
   stepperBASE.setAcceleration(500);
+
+  stepperSIM.setMaxSpeed(1000);
+  stepperSIM.setAcceleration(500);
+
   pinMode(SLEEP_PIN4, OUTPUT);
   digitalWrite(SLEEP_PIN4, LOW);
-  
-  stepperSIM.setMaxSpeed(1000);
-  stepperSIM.setAcceleration(300);
 }
 
 void loop() {
@@ -82,7 +83,7 @@ void loop() {
   stepperBASE.setSpeed(500);
   stepperBASE.run(); 
 
-  stepperSIM.setSpeed(500);
+  stepperSIM.setSpeed(1000);
   stepperSIM.run(); 
 
 }
