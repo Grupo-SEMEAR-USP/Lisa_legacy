@@ -1,7 +1,7 @@
 #include <AccelStepper.h>
 
 // Define a margem de erro como 5 passos
-#define erro 5  
+#define erro 0
 
 // Definições de pinos para o motor da cabeça
 //DIREITA
@@ -72,10 +72,11 @@ void setup() {
   // Configurações dos motores de passo
   configureStepper(stepperDIR, SLEEP_DIREITA, 300, 700);
   configureStepper(stepperESQ, SLEEP_ESQUERDA, 300, 700);
-  configureStepper(stepperNAO, SLEEP_NAO, 300, 500);
+  configureStepper(stepperNAO, SLEEP_NAO, 300, 700);
   configureStepper(stepperBASE, SLEEP_BASE, 300, 500);
   stepperSIM.setMaxSpeed(1000);
   stepperSIM.setAcceleration(500);
+  bravinha(stepperNAO);
   // feliz(stepperESQ, stepperDIR);
   // digitalWrite(SLEEP_ESQUERDA, LOW);
   // digitalWrite(SLEEP_DIREITA, LOW);
@@ -83,7 +84,8 @@ void setup() {
 
 void loop() {
   //cumprimentar(stepperESQ);
-  sapeca(stepperSIM, stepperESQ, stepperDIR);
+  //sapeca(stepperSIM, stepperESQ, stepperDIR);
+  //bravinha(stepperNAO);
   //sim(stepperSIM);
   //feliz(stepperESQ, stepperDIR);
   //digitalWrite(SLEEP_ESQUERDA, LOW);
@@ -131,7 +133,7 @@ void virar90(AccelStepper &stepper, int sleepPin, int direcao) {
 void virar60(AccelStepper &stepper, int sleepPin, int direcao) {
   digitalWrite(sleepPin, HIGH);
   stepper.move(graus(60) * direcao);
-  while (abs(stepper.distanceToGo()) > erro) {
+  while (abs(stepper.distanceToGo()) !=0) {
     stepper.run();
   }
   Serial.println("Motor moved 60 steps in direction: " + String(direcao));
@@ -230,10 +232,27 @@ void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &st
 
 // Função para executar movimentos "bravinha"
 void bravinha(AccelStepper &stepperNAO) {
-  for (int i = 0; i < 4; i++) {
-    virar60(stepperNAO, SLEEP_NAO, 1);
+  for (int i = 0; i < 2; i++) {
+          virar60(stepperNAO, SLEEP_NAO, 1);
     virar60(stepperNAO, SLEEP_NAO, -1);
+    virar60(stepperNAO, SLEEP_NAO, -1);
+    virar60(stepperNAO, SLEEP_NAO, 1);
+    // if(i==0){
+    //       virar60(stepperNAO, SLEEP_NAO, 1);
+    // virar60(stepperNAO, SLEEP_NAO, -1);
+    // virar60(stepperNAO, SLEEP_NAO, -1);
+    // virar60(stepperNAO, SLEEP_NAO, 1);
+    // }
+    // else{
+    //       virar60(stepperNAO, SLEEP_NAO, -1);
+    // virar60(stepperNAO, SLEEP_NAO, 1);
+    // virar60(stepperNAO, SLEEP_NAO, 1);
+    // virar60(stepperNAO, SLEEP_NAO, -1);
+    // }
+
   }
+
+  voltarPara0(stepperNAO, SLEEP_NAO);
 }
 
 // Função para executar movimentos de "sim"
