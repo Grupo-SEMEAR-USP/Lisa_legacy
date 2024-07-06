@@ -1,5 +1,4 @@
 #include <AccelStepper.h>
-#include <MultiStepper.h>
 
 // Define a margem de erro como 5 passos
 #define erro 0
@@ -61,7 +60,7 @@ void virar(AccelStepper &stepper, int sleepPin, float angle, int direcao);
 void voltarPara0(AccelStepper &stepper, int sleepPin);
 void cumprimentar(AccelStepper &stepperESQ);
 void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR);
-void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &stepperDIR);
+void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperNAO, AccelStepper &stepperESQ, AccelStepper &stepperDIR);
 void bravinha(AccelStepper &stepperNAO);
 void sim(AccelStepper &stepperSIM);
 void vitoria(AccelStepper &stepperBASE);
@@ -83,9 +82,10 @@ void setup() {
 void loop() {
   //sapeca(stepperSIM, stepperESQ, stepperDIR);
   //bravinha(stepperNAO);
-  sapeca(stepperSIM,stepperESQ,stepperDIR);
-  cumprimentar(stepperESQ);
+  sapeca(stepperSIM,stepperNAO, stepperESQ,stepperDIR);
+  //cumprimentar(stepperESQ);
   //confusa(stepperNAO,stepperSIM);
+  //feliz(stepperESQ,stepperDIR);
 }
 
 void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float acceleration) {
@@ -170,10 +170,13 @@ void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
   Serial.println("LISA feliz...");
 }
 
-void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
+void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperNAO, AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
   digitalWrite(SLEEP_DIREITA, HIGH);
   digitalWrite(SLEEP_ESQUERDA, HIGH);
+  digitalWrite(SLEEP_NAO, HIGH);
 
+  stepperNAO.setMaxSpeed(100);
+  stepperNAO.setAcceleration(500);
   stepperESQ.setMaxSpeed(200);
   stepperESQ.setAcceleration(500);
   stepperDIR.setMaxSpeed(200);
@@ -186,30 +189,36 @@ void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &st
     stepperESQ.moveTo(graus(60));
     stepperDIR.moveTo(-graus(120));
     stepperSIM.moveTo(grausSIM(60));
+    stepperNAO.moveTo(graus(60));
+
 
     // Loop enquanto qualquer um dos motores ainda estiver se movendo
-    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0) {
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0 || stepperNAO.distanceToGo() != 0) {
       stepperESQ.run();
       stepperDIR.run();
       stepperSIM.run();
+      stepperNAO.run();
     }
 
     // Movimenta os steppers para as novas posições alvo
     stepperESQ.moveTo(0);
     stepperDIR.moveTo(0);
     stepperSIM.moveTo(0);
+    stepperNAO.moveTo(0);
 
     // Loop enquanto qualquer um dos motores ainda estiver se movendo
-    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0) {
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0 || stepperNAO.distanceToGo() != 0) {
       stepperESQ.run();
       stepperDIR.run();
       stepperSIM.run();
+      stepperNAO.run();
     }
   }
   
 
   digitalWrite(SLEEP_DIREITA, LOW);
   digitalWrite(SLEEP_ESQUERDA, LOW);
+  digitalWrite(SLEEP_NAO,LOW);
   Serial.println("LISA sapeca...");
 }
 
