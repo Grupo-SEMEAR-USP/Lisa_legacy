@@ -18,6 +18,7 @@ class FingerCounter:
         self.processing = False
         self.latest_finger_count = 0
         self.finger_count_streak = {}
+        self.hands = mp_hands.Hands(static_image_mode=True, model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5)
         rospy.Subscriber('/Imagens', Image, self.image_callback)
         self.timer = rospy.Timer(rospy.Duration(interval), self.process_image)
         self.service = rospy.Service('/get_finger_count', Trigger, self.handle_get_finger_count)
@@ -33,31 +34,42 @@ class FingerCounter:
             try:
                 frame = bridge.imgmsg_to_cv2(self.image, desired_encoding='passthrough')
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                with mp_hands.Hands(static_image_mode=True, model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
-                    results = hands.process(frame_rgb)
-                    total_finger_count = 0
-                    
-                    if results.multi_hand_landmarks:
-                        for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
-                            hand_landmarks_list = [[lm.x, lm.y] for lm in hand_landmarks.landmark]
-                            label = handedness.classification[0].label
-                            
-                            if label == 'Left':
-                                if hand_landmarks_list[4][0] > hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1]: # Thumb
+                results = self.hands.process(frame_rgb)
+                total_finger_count = 0
+
+                if results.multi_hand_landmarks:
+                    for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
+                        hand_landmarks_list = [[lm.x, lm.y] for lm in hand_landmarks.landmark]
+                        label = handedness.classification[0].label
+      
+                        # Outros dedos
+                        if hand_landmarks_list[8][1] < hand_landmarks_list[6][1]:  # Indicador
+                            total_finger_count += 1
+                        if hand_landmarks_list[12][1] < hand_landmarks_list[10][1]:  # Médio
+                            total_finger_count += 1
+                        if hand_landmarks_list[16][1] < hand_landmarks_list[14][1]:  # Anelar
+                            total_finger_count += 1
+                        if hand_landmarks_list[20][1] < hand_landmarks_list[18][1]:  # Mínimo
+                            total_finger_count += 1
+                        if label == 'Left':
+                                if hand_landmarks_list[4][0] > hand_landmarks_list[1][0] and hand_landmarks_list[4][1] < hand_landmarks_list[3][1] and total_finger_count>=4: # Thumb
                                     total_finger_count += 1
-                            else:  # Left hand esta com alguns problemas de saber se é a mão esquerda ou direita
-                                if hand_landmarks_list[4][0] < hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1]: # Thumb
+                                    # rospy.loginfo("Direita")
+                                    # rospy.loginfo(f"X 4 {hand_landmarks_list[4][0]}")
+                                    # rospy.loginfo(f"X 1 {hand_landmarks_list[1][0]}")
+                                    # rospy.loginfo(f"Y 4 {hand_landmarks_list[4][1]}")
+                                    # rospy.loginfo(f"Y 2 {hand_landmarks_list[2][1]}")
+
+                                    
+                        else:  # Left hand esta com alguns problemas de saber se é a mão esquerda ou direita
+                                if hand_landmarks_list[4][0] < hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1] and total_finger_count>=4: # Thumb
                                     total_finger_count += 1
-                            # if hand_landmarks_list[4][0] > hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1]: # Thumb
-                            #     total_finger_count += 1
-                            if hand_landmarks_list[8][1] < hand_landmarks_list[6][1]:  # Index finger
-                                total_finger_count += 1
-                            if hand_landmarks_list[12][1] < hand_landmarks_list[10][1]:  # Middle finger
-                                total_finger_count += 1
-                            if hand_landmarks_list[16][1] < hand_landmarks_list[14][1]:  # Ring finger
-                                total_finger_count += 1
-                            if hand_landmarks_list[20][1] < hand_landmarks_list[18][1]:  # Pinky
-                                total_finger_count += 1
+                                    # rospy.loginfo("Esquerda")
+                                    # rospy.loginfo(f"X 4 {hand_landmarks_list[4][0]}")
+                                    # rospy.loginfo(f"X 1 {hand_landmarks_list[1][0]}")
+                                    # rospy.loginfo(f"Y 4 {hand_landmarks_list[4][1]}")
+                                    # rospy.loginfo(f"Y 2 {hand_landmarks_list[2][1]}")
+
                 self.update_finger_count_streak(total_finger_count)
                 rospy.loginfo(f"Contador de dedos: {total_finger_count}")
             except Exception as e:
@@ -70,7 +82,7 @@ class FingerCounter:
             self.finger_count_streak[finger_count] = 0
         self.finger_count_streak[finger_count] += 1
 
-        # Reset other counts
+        # Resetar outras contagens
         for count in list(self.finger_count_streak):
             if count != finger_count:
                 self.finger_count_streak[count] = 0
