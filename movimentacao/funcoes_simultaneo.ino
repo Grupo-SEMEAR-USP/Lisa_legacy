@@ -39,13 +39,16 @@
 long graus(float graus) {
   return (graus * passosPorRotacao * microsteps) / 360;
 }
+
 // Definição dos passos por rotação e microsteps
-#define passosPorRotacaoSIM 4075
+#define passosPorRotacaoSIM 4096
 #define microstepsSIM 1
+
 // Função para converter graus em passos
 long grausSIM(float graus) {
   return (graus * passosPorRotacaoSIM * microstepsSIM) / 360;
 }
+
 // Criação dos objetos stepper para a cabeça e o braço
 AccelStepper stepperDIR(1, STEP_PIN1, DIR_PIN1);
 AccelStepper stepperESQ(1, STEP_PIN2, DIR_PIN2);
@@ -53,11 +56,6 @@ AccelStepper stepperNAO(1, STEP_PIN3, DIR_PIN3);
 AccelStepper stepperBASE(1, STEP_PIN4, DIR_PIN4);
 AccelStepper stepperSIM(8, IN41, IN43, IN42, IN44);
 
-// Create an instance of MultiStepper to control multiple motors simultaneously
-MultiStepper steppersESQ_DIR_SIM;
-MultiStepper steppersESQ_DIR;
-
-// Declaração das funções
 void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float acceleration);
 void virar(AccelStepper &stepper, int sleepPin, float angle, int direcao);
 void voltarPara0(AccelStepper &stepper, int sleepPin);
@@ -68,7 +66,7 @@ void bravinha(AccelStepper &stepperNAO);
 void sim(AccelStepper &stepperSIM);
 void vitoria(AccelStepper &stepperBASE);
 void tristinha(AccelStepper &stepperSIM, AccelStepper &stepperNAO);
-void moveSimultaneously(MultiStepper &steppers, long positions[]);
+void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM);
 
 void setup() {
   // Inicia a comunicação serial com 115200 baud rate.
@@ -80,22 +78,14 @@ void setup() {
   configureStepper(stepperNAO, SLEEP_NAO, 300, 700);
   configureStepper(stepperBASE, SLEEP_BASE, 300, 500);
   configureStepper(stepperSIM, 0, 1000, 500); // SLEEP_PIN não é usado para o stepperSIM
-
-  // MultiStepper
-  steppersESQ_DIR_SIM.addStepper(stepperESQ);
-  steppersESQ_DIR_SIM.addStepper(stepperDIR);
-  steppersESQ_DIR_SIM.addStepper(stepperSIM);
-
-  steppersESQ_DIR.addStepper(stepperESQ);
-  steppersESQ_DIR.addStepper(stepperDIR);
 }
 
 void loop() {
-  //cumprimentar(stepperESQ);
-  sapeca(stepperSIM, stepperESQ, stepperDIR);
+  //sapeca(stepperSIM, stepperESQ, stepperDIR);
   //bravinha(stepperNAO);
-  //sim(stepperSIM);
-  //feliz(stepperESQ, stepperDIR);
+  sapeca(stepperSIM,stepperESQ,stepperDIR);
+  cumprimentar(stepperESQ);
+  //confusa(stepperNAO,stepperSIM);
 }
 
 void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float acceleration) {
@@ -151,16 +141,25 @@ void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
   digitalWrite(SLEEP_ESQUERDA, HIGH);
   for (int i = 0; i < 2; i++) {
     stepperESQ.setMaxSpeed(100);
-    stepperESQ.setAcceleration(500);
+    stepperESQ.setAcceleration(300);
     stepperDIR.setMaxSpeed(100);
-    stepperDIR.setAcceleration(500);
+    stepperDIR.setAcceleration(300);
 
-    long positions[2] = {graus(120), graus(-120)};
-    moveSimultaneously(steppersESQ_DIR, positions);
+    stepperESQ.moveTo(graus(120));
+    stepperDIR.moveTo(graus(120));
 
-    positions[0] = 0;
-    positions[1] = 0;
-    moveSimultaneously(steppersESQ_DIR, positions);
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+    }
+
+    stepperESQ.moveTo(0);
+    stepperDIR.moveTo(0);
+
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+    }
   }
   stepperESQ.setMaxSpeed(300);
   stepperESQ.setAcceleration(500);
@@ -171,26 +170,44 @@ void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
   Serial.println("LISA feliz...");
 }
 
-void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &stepperDIR ) {
+void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperESQ, AccelStepper &stepperDIR) {
   digitalWrite(SLEEP_DIREITA, HIGH);
   digitalWrite(SLEEP_ESQUERDA, HIGH);
 
-  for (int i = 0; i < 4; i++) {
-    stepperESQ.setMaxSpeed(200);
-    stepperESQ.setAcceleration(700);
-    stepperDIR.setMaxSpeed(200);
-    stepperDIR.setAcceleration(700);
-    stepperSIM.setMaxSpeed(200);
-    stepperSIM.setAcceleration(500);
+  stepperESQ.setMaxSpeed(200);
+  stepperESQ.setAcceleration(500);
+  stepperDIR.setMaxSpeed(200);
+  stepperDIR.setAcceleration(300);
+  stepperSIM.setMaxSpeed(1000);
+  stepperSIM.setAcceleration(1000);
 
-    long positions[3] = {graus(120), graus(120), grausSIM(60)};
-    moveSimultaneously(steppersESQ_DIR_SIM, positions);
+  for (int i = 0; i < 2; i++) {
+    // Movimenta os steppers para as posições alvo iniciais
+    stepperESQ.moveTo(graus(60));
+    stepperDIR.moveTo(-graus(120));
+    stepperSIM.moveTo(grausSIM(60));
 
-    positions[0] = 0;
-    positions[1] = 0;
-    positions[2] = 0;
-    moveSimultaneously(steppersESQ_DIR_SIM, positions);
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+      stepperSIM.run();
+    }
+
+    // Movimenta os steppers para as novas posições alvo
+    stepperESQ.moveTo(0);
+    stepperDIR.moveTo(0);
+    stepperSIM.moveTo(0);
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperSIM.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+      stepperSIM.run();
+    }
   }
+  
+
   digitalWrite(SLEEP_DIREITA, LOW);
   digitalWrite(SLEEP_ESQUERDA, LOW);
   Serial.println("LISA sapeca...");
@@ -200,11 +217,45 @@ void bravinha(AccelStepper &stepperNAO) {
   for (int i = 0; i < 2; i++) {
     virar(stepperNAO, SLEEP_NAO, 60, 1);
     virar(stepperNAO, SLEEP_NAO, 60, -1);
-    virar(stepperNAO, SLEEP_NAO, 60, 1);
     virar(stepperNAO, SLEEP_NAO, 60, -1);
+    virar(stepperNAO, SLEEP_NAO, 60, 1);
   }
   voltarPara0(stepperNAO, SLEEP_NAO);
   Serial.println("LISA bravinha...");
+}
+
+void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM) {
+  digitalWrite(SLEEP_NAO, HIGH);
+
+  stepperNAO.setMaxSpeed(100);
+  stepperNAO.setAcceleration(500);
+  stepperSIM.setMaxSpeed(500);
+  stepperSIM.setAcceleration(1000);
+
+  // Configura o SIM para girar continuamente
+  stepperSIM.setSpeed(500);  // Configura a velocidade do SIM
+
+  for (int i = 0; i < 2; i++) {
+    // Movimenta o stepperNAO para a posição alvo inicial
+    stepperNAO.moveTo(graus(60));
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperNAO.distanceToGo() != 0) {
+      stepperNAO.run();
+      stepperSIM.runSpeed();  // Gira o SIM continuamente
+    }
+
+    // Movimenta o stepperNAO para a nova posição alvo
+    stepperNAO.moveTo(0);
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperNAO.distanceToGo() != 0) {
+      stepperNAO.run();
+      stepperSIM.runSpeed();  // Gira o SIM continuamente
+    }
+  }
+
+  digitalWrite(SLEEP_NAO, LOW);
 }
 
 void sim(AccelStepper &stepperSIM) {
@@ -245,11 +296,4 @@ void tristinha(AccelStepper &stepperSIM, AccelStepper &stepperNAO) {
   }
   digitalWrite(SLEEP_NAO, LOW);
   Serial.println("LISA tristinha...");
-}
-
-void moveSimultaneously(MultiStepper &steppers, long positions[]) {
-  // moveTo vai configurar a posição alvo para cada motor no array positions
-  steppers.moveTo(positions);
-  // runSpeedToPosition vai mover os motores até a posição alvo
-  steppers.runSpeedToPosition();
 }
