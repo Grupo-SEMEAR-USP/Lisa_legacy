@@ -72,7 +72,7 @@ void feliz(AccelStepper &stepperESQ, AccelStepper &stepperDIR);
 void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperNAO, AccelStepper &stepperESQ, AccelStepper &stepperDIR);
 void bravinha(AccelStepper &stepperNAO);
 void sim(AccelStepper &stepperSIM);
-void vitoria(AccelStepper &stepperBASE);
+void vitoria(AccelStepper &stepperBASE, AccelStepper &stepperESQ);
 void tristinha(AccelStepper &stepperSIM);
 void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM);
 void bombastic(AccelStepper &stepperNAO);
@@ -85,6 +85,26 @@ String resultado;
 bool seguirNAO = false;
 bool devedancar = false;
 int dancinha = -1; // Variável para armazenar a dança a ser executada
+
+void centerXCallback(const std_msgs::Float32& msg) {
+  distancia_x = msg.data;
+  
+  if (distancia_x > 50) {
+    digitalWrite(2, HIGH);  // Acende o LED no pino 2
+    digitalWrite(SLEEP_NAO, HIGH);
+    stepperNAO.setSpeed(30);
+    seguirNAO = true;  // Permite que o motor rode no loop
+  } else if (distancia_x < -50) {
+    digitalWrite(2, HIGH);  // Acende o LED no pino 2
+    digitalWrite(SLEEP_NAO, HIGH);
+    stepperNAO.setSpeed(-30); // Velocidade negativa para inverter o sentido
+    seguirNAO = true;  // Permite que o motor rode no loop
+  } else {
+    digitalWrite(2, LOW);   // Apaga o LED no pino 2
+    digitalWrite(SLEEP_NAO, LOW);
+    seguirNAO = false; // Impede que o motor rode no loop
+  }
+}
 
 void resultCallback(const std_msgs::String& msg) {
   resultado = msg.data;
@@ -105,7 +125,8 @@ void resultCallback(const std_msgs::String& msg) {
   } else if (resultado == "Gesto reconhecido: Gesto Closed_Fist reconhecido 5 vezes seguidas") {
     dancinha = 4;
     devedancar = true;
-  } else if (resultado == "sim") {
+  // assustada
+  } else if (resultado == "ativando o modo susto") {
     dancinha = 5;
     devedancar = true;
   // vitoria
@@ -116,8 +137,13 @@ void resultCallback(const std_msgs::String& msg) {
   } else if (resultado == "Gesto reconhecido: Gesto Thumb_Down reconhecido 5 vezes seguidas") {
     dancinha = 7;
     devedancar = true;
+  // amor
     } else if (resultado == "ativando o modo amor") {
     dancinha = 8;
+    devedancar = true;
+  // festa
+  } else if (resultado == "ativando o modo festa") {
+    dancinha = 9;
     devedancar = true;
   } else {
     dancinha = -1; // Nenhuma dança
@@ -156,6 +182,10 @@ void setup() {
 void loop() {
   nh.spinOnce();
 
+    if (seguirNAO && !devedancar) {
+    stepperNAO.runSpeed(); // Mantém o motor da cabeça em movimento constante
+  }
+
   if (devedancar) {
     // Publica os valores de devedancar e dancinha
     msg_devedancar.data = devedancar;
@@ -179,10 +209,10 @@ void loop() {
         bravinha(stepperNAO);
         break;
       case 5:
-        sim(stepperSIM);
+        assustada(stepperESQ, stepperDIR, stepperNAO);
         break;
       case 6:
-        vitoria(stepperBASE);
+        vitoria(stepperBASE, stepperESQ);
         break;
       case 7:
         tristinha(stepperSIM);
@@ -190,6 +220,8 @@ void loop() {
       case 8:
         amor(stepperNAO, stepperBASE, stepperESQ, stepperDIR);
         break;
+      case 9:
+        dancinha_festa(stepperESQ, stepperDIR, stepperBASE);
       default:
         // Nenhuma dança
         break;
@@ -396,22 +428,7 @@ void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM) {
   digitalWrite(SLEEP_NAO, LOW);
 }
 
-void sim(AccelStepper &stepperSIM) {
-  for (int i = 0; i < 2; i++) {
-    stepperSIM.setMaxSpeed(500);
-    stepperSIM.setAcceleration(1000);
-
-    stepperSIM.moveTo(1000);
-    stepperSIM.runToPosition();
-    delay(100);
-    stepperSIM.moveTo(0);
-    stepperSIM.runToPosition();
-    delay(100);
-  }
-  Serial.println("LISA confirmando...");
-}
-
-void vitoria(AccelStepper &stepperBASE) {  //adicionar bracinhos para cima
+void vitoria(AccelStepper &stepperBASE, AccelStepper &stepperESQ) {  //adicionar bracinhos para cima
   virar(stepperESQ, SLEEP_ESQUERDA, 120, -1);
   stepperESQ.setMaxSpeed(800);
   stepperESQ.setAcceleration(1000);
@@ -436,7 +453,17 @@ void vitoria(AccelStepper &stepperBASE) {  //adicionar bracinhos para cima
 }
 
 void tristinha(AccelStepper &stepperSIM) {
-  sim(stepperSIM);
+    for (int i = 0; i < 2; i++) {
+    stepperSIM.setMaxSpeed(500);
+    stepperSIM.setAcceleration(1000);
+
+    stepperSIM.moveTo(-grausSIM(90));
+    stepperSIM.runToPosition();
+    delay(100);
+    stepperSIM.moveTo(0);
+    stepperSIM.runToPosition();
+    delay(100);
+  }
 }
 
 void bombastic(AccelStepper &stepperNAO){
