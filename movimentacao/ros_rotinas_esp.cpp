@@ -151,6 +151,7 @@ void resultCallback(const std_msgs::String& msg) {
   }
 }
 
+ros::Subscriber<std_msgs::Float32> sub_x("/face_center_x", &centerXCallback);
 ros::Subscriber<std_msgs::String> sub_result("/resultados", &resultCallback);
 
 // Publishers para devedancar e dancinha
