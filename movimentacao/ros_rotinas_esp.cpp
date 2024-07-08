@@ -7,7 +7,6 @@
 
 ros::NodeHandle nh;
 
-#define LED_BUILTIN 2
 // Define a margem de erro como 5 passos
 #define erro 0
 
