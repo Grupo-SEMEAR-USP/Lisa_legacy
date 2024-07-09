@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-
 # Import the necessary libraries
 import rospy
 from sensor_msgs.msg import Image
+from std_msgs.msg import Bool
 from cv_bridge import CvBridge
 import cv2
 import mediapipe as mp
@@ -42,29 +42,27 @@ def find_face(frame):
         # Return the largest face region
         return largest_face
     
-    
-    # Return the original frame if no faces are detected
-    return frame
+    # Return None if no faces are detected
+    return None
 
 def callback(data):
     br = CvBridge()
     current_frame = br.imgmsg_to_cv2(data)
     face_frame = find_face(current_frame)
-    rospy.loginfo('Encontrando Rostos')
+    # rospy.loginfo('Encontrando Rostos')
     
     if face_frame is not None:
         # Convert the face frame back to a ROS Image message
         face_msg = br.cv2_to_imgmsg(face_frame, encoding="passthrough")
         pub.publish(face_msg)
-    # # Display image
-    # cv2.imshow("Detected Faces", face_frame)
-    # # Wait for 1 millisecond to see if the user presses a key to close
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     rospy.signal_shutdown("User requested shutdown.")
+        face_detected_pub.publish(True)
+    else:
+        face_detected_pub.publish(False)
 
 def publish_faces():
-    global pub
+    global pub, face_detected_pub
     pub = rospy.Publisher('/Rostos', Image, queue_size=10)
+    face_detected_pub = rospy.Publisher('/face_detected', Bool, queue_size=10)
     rospy.init_node('encontrar_rostos_pub_py', anonymous=True)
     rospy.Subscriber('/Imagens', Image, callback)
     rospy.spin()
