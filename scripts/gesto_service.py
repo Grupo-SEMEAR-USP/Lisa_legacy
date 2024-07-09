@@ -56,6 +56,7 @@ def handle_gesture_recognition(req):
     if current_image is None:
         return TriggerResponse(success=False, message="Nenhuma imagem recebida")
     
+    
     frame = bridge.imgmsg_to_cv2(current_image, desired_encoding="passthrough")
     gesture = detect_hand_gesture(frame)
     if gesture in gesture_mapping:
@@ -63,11 +64,10 @@ def handle_gesture_recognition(req):
             gesture_counts[gesture] = 0
         gesture_counts[gesture] += 1
 
-        if gesture_counts[gesture] >= 3:
-            rospy.loginfo(f"Gesto {gesture} reconhecido 3 vezes seguidas")
+        if gesture_counts[gesture] >= 5:
+            rospy.loginfo(f"Gesto {gesture} reconhecido 5 vezes seguidas")
             gesture_counts = {}  # Reset counter
-            rospy.set_param('/stop_counting', False)  # Enable finger counting again
-            return TriggerResponse(success=True, message=f"Gesto {gesture} reconhecido 3 vezes seguidas")
+            return TriggerResponse(success=True, message=f"Gesto {gesture} reconhecido 5 vezes seguidas")
         else:
             return TriggerResponse(success=True, message=f"Gesto {gesture} reconhecido {gesture_counts[gesture]} vezes")
     else:
