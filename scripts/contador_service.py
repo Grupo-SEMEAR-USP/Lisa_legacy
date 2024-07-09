@@ -41,9 +41,9 @@ class FingerCounter:
                     for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                         hand_landmarks_list = [[lm.x, lm.y] for lm in hand_landmarks.landmark]
                         label = handedness.classification[0].label
-      
+
                         # Outros dedos
-                        if hand_landmarks_list[8][1] < hand_landmarks_list[6][1]:  # Indicador
+                        if hand_landmarks_list[8][1] < hand_landmarks_list[6][1] and hand_landmarks_list[8][0] > hand_landmarks_list[5][0]:  # Indicador (novo critério)
                             total_finger_count += 1
                         if hand_landmarks_list[12][1] < hand_landmarks_list[10][1]:  # Médio
                             total_finger_count += 1
@@ -51,26 +51,27 @@ class FingerCounter:
                             total_finger_count += 1
                         if hand_landmarks_list[20][1] < hand_landmarks_list[18][1]:  # Mínimo
                             total_finger_count += 1
-                        if label == 'Left':
-                                if hand_landmarks_list[4][0] > hand_landmarks_list[1][0] and hand_landmarks_list[4][1] < hand_landmarks_list[3][1] and total_finger_count>=4: # Thumb
-                                    total_finger_count += 1
-                                    # rospy.loginfo("Direita")
-                                    # rospy.loginfo(f"X 4 {hand_landmarks_list[4][0]}")
-                                    # rospy.loginfo(f"X 1 {hand_landmarks_list[1][0]}")
-                                    # rospy.loginfo(f"Y 4 {hand_landmarks_list[4][1]}")
-                                    # rospy.loginfo(f"Y 2 {hand_landmarks_list[2][1]}")
 
-                                    
-                        else:  # Left hand esta com alguns problemas de saber se é a mão esquerda ou direita
-                                if hand_landmarks_list[4][0] < hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1] and total_finger_count>=4: # Thumb
+                        # Verificar se apenas o dedo médio está levantado
+                        if total_finger_count == 1 and hand_landmarks_list[12][1] < hand_landmarks_list[10][1]:
+                            # Verifica se o dedo médio está levantado em relação aos outros dedos
+                            if (hand_landmarks_list[12][1] < hand_landmarks_list[8][1] and
+                                hand_landmarks_list[12][1] < hand_landmarks_list[16][1] and
+                                hand_landmarks_list[12][1] < hand_landmarks_list[20][1]):
+                                rospy.loginfo("Dedo do meio levantado")
+                                total_finger_count = 11
+
+                        # Polegar (sem necessidade de verificar outros dedos levantados)
+                        if total_finger_count != 11:  # Só verifica o polegar se não for o caso do dedo médio levantado
+                            if label == 'Left':
+                                if hand_landmarks_list[4][0] > hand_landmarks_list[1][0] and hand_landmarks_list[4][1] < hand_landmarks_list[3][1] and total_finger_count>=4:  # Thumb
                                     total_finger_count += 1
-                                    # rospy.loginfo("Esquerda")
-                                    # rospy.loginfo(f"X 4 {hand_landmarks_list[4][0]}")
-                                    # rospy.loginfo(f"X 1 {hand_landmarks_list[1][0]}")
-                                    # rospy.loginfo(f"Y 4 {hand_landmarks_list[4][1]}")
-                                    # rospy.loginfo(f"Y 2 {hand_landmarks_list[2][1]}")
+                            else:  # Right hand
+                                if hand_landmarks_list[4][0] < hand_landmarks_list[3][0] and hand_landmarks_list[4][1] < hand_landmarks_list[2][1] and total_finger_count>=4:  # Thumb
+                                    total_finger_count += 1
 
                 self.update_finger_count_streak(total_finger_count)
+                        
                 rospy.loginfo(f"Contador de dedos: {total_finger_count}")
             except Exception as e:
                 rospy.logerr(f"Erro ao processar imagem: {e}")
@@ -93,7 +94,7 @@ class FingerCounter:
             self.latest_finger_count = 0
 
     def handle_get_finger_count(self, req):
-        if self.latest_finger_count in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+        if self.latest_finger_count in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
             return TriggerResponse(success=True, message=str(self.latest_finger_count))
         else:
             return TriggerResponse(success=False, message=str(self.latest_finger_count))
