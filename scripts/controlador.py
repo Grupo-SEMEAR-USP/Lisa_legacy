@@ -3,54 +3,43 @@
 import rospy
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger, TriggerRequest
-from std_msgs.msg import String, Bool
+from std_msgs.msg import String, Bool, Int32
 import time
-import pigpio
 
 class Controlador:
     def __init__(self):
         rospy.init_node('controlador_node')
         rospy.wait_for_service('/get_finger_count')
         rospy.wait_for_service('/recognize_gesture')
-        rospy.wait_for_service('/recognize_face')
 
         self.get_finger_count = rospy.ServiceProxy('/get_finger_count', Trigger)
         self.recognize_gesture = rospy.ServiceProxy('/recognize_gesture', Trigger)
-        self.recognize_face = rospy.ServiceProxy('/recognize_face', Trigger)
+        self.face_detected_sub = rospy.Subscriber('/face_detected', Bool, self.face_detected_callback)
         self.image_sub = rospy.Subscriber('/Imagens', Image, self.image_callback)
         self.result_pub = rospy.Publisher('/resultados', String, queue_size=10)
         self.state_pub = rospy.Publisher('/estado', Bool, queue_size=10)
+        self.orelhas_pub = rospy.Publisher('/orelhas', Int32, queue_size=10)
         self.current_image = None
+        self.face_detected = False
         self.stop_counting = False
         self.gesture_active = False
-        self.face_active = False
         self.mode_active = False
+        self.drawing_active = False  # Variável para controlar o serviço de desenho
         self.rate = rospy.Rate(1)  # 1 Hz
-
-
-    #     # Inicializa o pigpio e configura o servo
-    #     self.pi = pigpio.pi()
-    #     self.servo_pin = 18
-    #     self.servo_min = 500  # 0 graus
-    #     self.servo_max = 2500  # 180 graus
-
-    # def __del__(self):
-    #     # Libera os recursos do pigpio ao destruir a instância do controlador
-    #     self.pi.set_servo_pulsewidth(self.servo_pin, 0)
-    #     self.pi.stop()
-
-    # def set_servo_angle(self, angle):
-    #     pulsewidth = self.servo_min + (angle / 180.0) * (self.servo_max - self.servo_min)
-    #     self.pi.set_servo_pulsewidth(self.servo_pin, pulsewidth)
 
     def image_callback(self, msg):
         self.current_image = msg
-
+    def face_detected_callback(self, msg):
+        self.face_detected = msg.data
+        if not self.face_detected:
+            self.stop_counting = not msg.data
+            rospy.set_param('/stop_counting', self.stop_counting)
+        
     def reset_states(self):
         self.gesture_active = False
-        self.face_active = False
         self.mode_active = False
         self.stop_counting = False
+        self.drawing_active = False  # Reinicia o estado do serviço de desenho
         rospy.set_param('/stop_counting', False)
 
     def run(self):
@@ -71,6 +60,8 @@ class Controlador:
                             if "5 vezes seguidas" in gesture_response.message:
                                 rospy.loginfo("Gesto reconhecido 5 vezes. Reativando contador de dedos.")
                                 self.result_pub.publish(f"Gesto reconhecido: {gesture_response.message}")
+                                time.sleep(7)
+                                self.rate.sleep()
                                 self.reset_states()
                         else:
                             rospy.loginfo("Nenhum gesto reconhecido ou reconhecimento não concluído.")
@@ -79,19 +70,24 @@ class Controlador:
                     self.rate.sleep()
                     continue
 
-                if self.face_active:
-                    rospy.loginfo("Reconhecimento de rostos em andamento...")
+
+                if self.drawing_active:
+                    rospy.loginfo("Serviço de desenho no quadro ativado...")
                     try:
-                        face_response = self.recognize_face()
-                        if face_response.success:
-                            rospy.loginfo(f"Rosto reconhecido: {face_response.message}")
-                            self.result_pub.publish(f"Rosto reconhecido: {face_response.message}")
-                            self.reset_states()
+                        draw_response = self.draw_on_board()
+                        if draw_response.success:
+                            rospy.loginfo("Desenho no quadro concluído.")
                         else:
-                            rospy.loginfo("Nenhum rosto reconhecido ou reconhecimento não concluído.")
+                            rospy.loginfo("Falha ao desenhar no quadro.")
                     except rospy.ServiceException as e:
-                        rospy.logerr("Falha ao chamar o serviço: %s", e)
+                        rospy.logerr("Falha ao chamar o serviço de desenho: %s", e)
                     self.rate.sleep()
+                    continue
+
+                else:
+                    rospy.loginfo("Não está contando e nenhum serviço ativo...")
+                    if self.face_detected:
+                        self.reset_states()
                     continue
 
             if not self.stop_counting:
@@ -106,19 +102,15 @@ class Controlador:
                             self.mode_active = True
                             self.stop_counting = True
                             rospy.set_param('/stop_counting', True)
+                            self.orelhas_pub.publish(1)  # Publica 1 no tópico /orelhas
                             time.sleep(7)
+                            self.orelhas_pub.publish(0)  # Publica 1 no tópico /orelhas
                             self.reset_states()
                             self.rate.sleep()  # Adiciona uma pequena pausa para evitar reiniciar imediatamente
 
                         elif finger_count == 2 and not self.mode_active:
                             rospy.loginfo("Contador é 2, ativando serviço de gestos.")
                             self.gesture_active = True
-                            self.stop_counting = True
-                            rospy.set_param('/stop_counting', True)
-
-                        elif finger_count == 3 and not self.mode_active:
-                            rospy.loginfo("Contador é 3, ativando serviço de reconhecimento de rostos.")
-                            self.face_active = True
                             self.stop_counting = True
                             rospy.set_param('/stop_counting', True)
 
@@ -129,13 +121,6 @@ class Controlador:
                             rospy.sleep(5)  # Pausa de 5 segundos
                             self.stop_counting = True
                             rospy.set_param('/stop_counting', True)
-                            # for _ in range(4):
-                            #     rospy.loginfo("Controlando Servos")
-                            #     self.set_servo_angle(0)
-                            #     time.sleep(0.5)
-                            #     self.set_servo_angle(90)
-                            #     time.sleep(0.5)
-                            # self.stop_counting = True
                             time.sleep(7)
                             self.reset_states()
                             self.rate.sleep()  # Adiciona uma pequena pausa para evitar reiniciar imediatamente
@@ -146,9 +131,15 @@ class Controlador:
                             self.mode_active = True
                             self.stop_counting = True
                             rospy.set_param('/stop_counting', True)
-                            time.sleep(7)
-                            self.reset_states()
-                            self.rate.sleep()  # Adiciona uma pequena pausa para evitar reiniciar imediatamente
+                            time.sleep(31)
+                            self.rate.sleep() 
+                            self.reset_states() 
+                            
+                        # elif finger_count == 6 and not self.mode_active:
+                        #     rospy.loginfo("Contador é 7, ativando serviço de desenho no quadro.")
+                        #     self.drawing_active = True
+                        #     self.stop_counting = True
+                        #     rospy.set_param('/stop_counting', True)
 
                         elif finger_count == 10 and not self.mode_active:
                             rospy.loginfo("Contador é 10, ativando modo susto.")
@@ -157,8 +148,18 @@ class Controlador:
                             self.stop_counting = True
                             rospy.set_param('/stop_counting', True)
                             time.sleep(7)
-                            self.reset_states()
-                            self.rate.sleep()  # Adiciona uma pequena pausa para evitar reiniciar imediatamente
+                            self.rate.sleep()  
+                            self.reset_states() # Adiciona uma pequena pausa para evitar reiniciar imediatamente
+                            
+                        elif finger_count == 11 and not self.mode_active:
+                            rospy.loginfo("Contador identificou o dedo do meio")
+                            self.result_pub.publish("ativando o modo raiva")
+                            self.mode_active = True
+                            self.stop_counting = True
+                            rospy.set_param('/stop_counting', True)
+                            time.sleep(7)
+                            self.rate.sleep()
+                            self.reset_states() # Adiciona uma pequena pausa para evitar reiniciar imediatamente
 
                         else:
                             self.result_pub.publish(f"Numero de dedos: {finger_count}")
