@@ -163,7 +163,7 @@ void setup() {
   configureStepper(stepperDIR, SLEEP_DIREITA, 300, 700);
   configureStepper(stepperESQ, SLEEP_ESQUERDA, 300, 700);
   configureStepper(stepperNAO, SLEEP_NAO, 300, 700);
-  configureStepper(stepperBASE, SLEEP_BASE, 100, 500);
+  configureStepper(stepperBASE, SLEEP_BASE, 100, 300);
   configureStepper(stepperSIM, 0, 1000, 500); // SLEEP_PIN não é usado para o stepperSIM
 
   nh.getHardware()->setBaud(115200);
