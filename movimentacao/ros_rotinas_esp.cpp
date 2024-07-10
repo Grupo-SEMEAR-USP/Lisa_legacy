@@ -91,20 +91,37 @@ void centerXCallback(const std_msgs::Float32& msg) {
   
   if (distancia_x > 50) {
     digitalWrite(SLEEP_NAO, HIGH);
-    stepperNAO.setSpeed(30);
+    digitalWrite(2, HIGH);  // Acende o LED no pino 2
+    stepperNAO.setMaxSpeed(1000);
+    stepperNAO.setAcceleration(200);
+    stepperNAO.setSpeed(30); // Começa parado
     seguirNAO = true;  // Permite que o motor rode no loop
+    // Configurações iniciais dos motores
+
   } else if (distancia_x < -50) {
     digitalWrite(SLEEP_NAO, HIGH);
-    stepperNAO.setSpeed(-30); // Velocidade negativa para inverter o sentido
+    digitalWrite(2, HIGH);  // Acende o LED no pino 2
     seguirNAO = true;  // Permite que o motor rode no loop
+    stepperNAO.setMaxSpeed(1000);
+    stepperNAO.setAcceleration(200);
+    stepperNAO.setSpeed(-30); // Começa parado
   } else {
     digitalWrite(SLEEP_NAO, LOW);
-    seguirNAO = false; // Impede que o motor rode no loop
-  }
+    digitalWrite(2, LOW);  // Acende o LED no pino 2
+    seguirNAO = false; // Impede que o motor rode no     digitalWrite(2, HIGH);  // Acende o LED no pino 2loop
+    stepperNAO.setMaxSpeed(1000);
+    stepperNAO.setAcceleration(200);
+    configureStepper(stepperNAO, SLEEP_NAO, 300, 700);
+
+  pinMode(2, OUTPUT);  // Configura o pino 2 como saída para controlar o LED
 }
+
+  }
+
 
 void resultCallback(const std_msgs::String& msg) {
   resultado = msg.data;
+  pinMode(2, OUTPUT);  // Configura o pino 2 como saída para controlar o LED
 
 
   if (resultado == "Gesto reconhecido: Gesto Open_Palm reconhecido 5 vezes seguidas") {
@@ -167,6 +184,7 @@ void setup() {
   configureStepper(stepperBASE, SLEEP_BASE, 100, 300);
   configureStepper(stepperSIM, 0, 1000, 500); // SLEEP_PIN não é usado para o stepperSIM
 
+
   nh.getHardware()->setBaud(115200);
   nh.initNode();
   nh.subscribe(sub_result);
@@ -179,7 +197,7 @@ void setup() {
 void loop() {
   nh.spinOnce();
 
-    if (seguirNAO && !devedancar) {
+    if (seguirNAO) {
     stepperNAO.runSpeed(); // Mantém o motor da cabeça em movimento constante
   }
 
