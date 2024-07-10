@@ -163,7 +163,7 @@ void setup() {
   configureStepper(stepperDIR, SLEEP_DIREITA, 300, 700);
   configureStepper(stepperESQ, SLEEP_ESQUERDA, 300, 700);
   configureStepper(stepperNAO, SLEEP_NAO, 300, 700);
-  configureStepper(stepperBASE, SLEEP_BASE, 300, 500);
+  configureStepper(stepperBASE, SLEEP_BASE, 100, 500);
   configureStepper(stepperSIM, 0, 1000, 500); // SLEEP_PIN não é usado para o stepperSIM
 
   nh.getHardware()->setBaud(115200);
@@ -193,7 +193,7 @@ void loop() {
     // Executa a dança correspondente com base na variável danceMove
     switch (dancinha) {
       case 1:
-        cumprimentar(stepperESQ);
+        bombastic(stepperNAO);
         break;
       case 2:
         feliz(stepperESQ, stepperDIR);
@@ -379,16 +379,24 @@ void sapeca(AccelStepper &stepperSIM, AccelStepper &stepperNAO, AccelStepper &st
 
 void bravinha(AccelStepper &stepperNAO) {
     stepperNAO.setMaxSpeed(100);
-  stepperNAO.setAcceleration(500);
-  for (int i = 0; i < 2; i++) {
-    virar(stepperNAO, SLEEP_NAO, 70, 1);
-    virar(stepperNAO, SLEEP_NAO, 70, -1);
-    virar(stepperNAO, SLEEP_NAO, 70, -1);
-    virar(stepperNAO, SLEEP_NAO, 70, 1);
-  }
-  voltarPara0(stepperNAO, SLEEP_NAO);
-  Serial.println("LISA bravinha...");
+    stepperNAO.setAcceleration(200);
+    for (int i = 0; i < 2; i++) {
+        if (i % 2 == 0) { // Checa se i é par
+            virar(stepperNAO, SLEEP_NAO, 60, 1);
+            virar(stepperNAO, SLEEP_NAO, 60, -1);
+            virar(stepperNAO, SLEEP_NAO, 60, -1);
+            virar(stepperNAO, SLEEP_NAO, 60, 1);
+        } else { // Caso contrário, é ímpar
+            virar(stepperNAO, SLEEP_NAO, 60, -1);
+            virar(stepperNAO, SLEEP_NAO, 60, 1);
+            virar(stepperNAO, SLEEP_NAO, 60, 1);
+            virar(stepperNAO, SLEEP_NAO, 60, -1);
+        }
+    }
+    voltarPara0(stepperNAO, SLEEP_NAO);
+    Serial.println("LISA bravinha...");
 }
+
 
 void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM) {
   digitalWrite(SLEEP_NAO, HIGH);
@@ -493,7 +501,7 @@ void amor(AccelStepper &stepperNAO, AccelStepper &stepperBASE, AccelStepper &ste
   stepperDIR.setMaxSpeed(200);
   stepperDIR.setAcceleration(300);
   stepperBASE.setMaxSpeed(100);
-  stepperBASE.setAcceleration(500);
+  stepperBASE.setAcceleration(300);
 
   for (int i = 0; i < 2; i++) {
     // Movimenta os steppers para as posições alvo iniciais
@@ -571,7 +579,7 @@ void dancinha_festa(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelSte
 
     // Movimenta os steppers para as novas posições alvo
     stepperESQ.moveTo(-graus(30));
-    stepperDIR.moveTo(-graus(30));
+    stepperDIR.moveTo(-graus(-30));
     stepperBASE.moveTo(-graus(30));
 
     // Loop enquanto qualquer um dos motores ainda estiver se movendo
