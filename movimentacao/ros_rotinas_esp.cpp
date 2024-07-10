@@ -78,6 +78,7 @@ void bombastic(AccelStepper &stepperNAO);
 void amor(AccelStepper &stepperNAO, AccelStepper &stepperBASE, AccelStepper &stepperESQ, AccelStepper &stepperDIR);
 void dancinha_festa(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelStepper &stepperBASE);
 void assustada(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelStepper &stepperNAO);
+void resetar_motores();
 
 float distancia_x = 0;
 String resultado;
@@ -183,6 +184,7 @@ void loop() {
   }
 
   if (devedancar) {
+    resetar_motores();
     // Publica os valores de devedancar e dancinha
     msg_devedancar.data = devedancar;
     pub_devedancar.publish(&msg_devedancar);
@@ -235,6 +237,16 @@ void configureStepper(AccelStepper &stepper, int sleepPin, float maxSpeed, float
     pinMode(sleepPin, OUTPUT);
     digitalWrite(sleepPin, LOW);
   }
+}
+
+void resetar_motores(){
+    voltarPara0(stepperESQ,SLEEP_ESQUERDA);
+    voltarPara0(stepperDIR,SLEEP_DIREITA);
+    voltarPara0(stepperBASE,SLEEP_BASE);
+    voltarPara0(stepperNAO,SLEEP_NAO);
+    stepperSIM.moveTo(0);
+    stepperSIM.runToPosition();
+
 }
 
 void virar(AccelStepper &stepper, int sleepPin, float angle, int direcao) {
@@ -565,6 +577,7 @@ void dancinha_festa(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelSte
   stepperBASE.setAcceleration(500);
 
   for (int i = 0; i < 2; i++) {
+    if (i % 2 == 0) { // Checa se i é par
     // Movimenta os steppers para as posições alvo iniciais
     stepperESQ.moveTo(-graus(60));
     stepperDIR.moveTo(-graus(60));
@@ -601,6 +614,44 @@ void dancinha_festa(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelSte
       stepperBASE.run();
     }
   }
+  else { // Checa se i é par
+    // Movimenta os steppers para as posições alvo iniciais
+    stepperESQ.moveTo(graus(60));
+    stepperDIR.moveTo(graus(60));
+    stepperBASE.moveTo(-graus(60));
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperBASE.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+      stepperBASE.run();
+    }
+
+    // Movimenta os steppers para as novas posições alvo
+    stepperESQ.moveTo(graus(30));
+    stepperDIR.moveTo(graus(-30));
+    stepperBASE.moveTo(graus(30));
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperBASE.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+      stepperBASE.run();
+    }
+
+    // Movimenta os steppers para as novas posições alvo
+    stepperESQ.moveTo(graus(0));
+    stepperDIR.moveTo(graus(0));
+    stepperBASE.moveTo(graus(0));
+
+    // Loop enquanto qualquer um dos motores ainda estiver se movendo
+    while (stepperESQ.distanceToGo() != 0 || stepperDIR.distanceToGo() != 0 || stepperBASE.distanceToGo() != 0) {
+      stepperESQ.run();
+      stepperDIR.run();
+      stepperBASE.run();
+    }
+  }
+}
   digitalWrite(SLEEP_BASE, LOW);
   digitalWrite(SLEEP_ESQUERDA, LOW);
   digitalWrite(SLEEP_DIREITA, LOW);
