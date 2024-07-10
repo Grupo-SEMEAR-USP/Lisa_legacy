@@ -89,17 +89,14 @@ void centerXCallback(const std_msgs::Float32& msg) {
   distancia_x = msg.data;
   
   if (distancia_x > 50) {
-    digitalWrite(2, HIGH);  // Acende o LED no pino 2
     digitalWrite(SLEEP_NAO, HIGH);
     stepperNAO.setSpeed(30);
     seguirNAO = true;  // Permite que o motor rode no loop
   } else if (distancia_x < -50) {
-    digitalWrite(2, HIGH);  // Acende o LED no pino 2
     digitalWrite(SLEEP_NAO, HIGH);
     stepperNAO.setSpeed(-30); // Velocidade negativa para inverter o sentido
     seguirNAO = true;  // Permite que o motor rode no loop
   } else {
-    digitalWrite(2, LOW);   // Apaga o LED no pino 2
     digitalWrite(SLEEP_NAO, LOW);
     seguirNAO = false; // Impede que o motor rode no loop
   }
@@ -176,7 +173,6 @@ void setup() {
   nh.advertise(pub_devedancar);
   nh.advertise(pub_dancinha);
 
-  pinMode(LED_BUILTIN, OUTPUT);  // Configura o pino 2 como saída para controlar o LED
 }
 
 void loop() {
