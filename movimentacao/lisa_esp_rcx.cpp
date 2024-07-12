@@ -189,7 +189,7 @@ void loop() {
         feliz(stepperESQ, stepperDIR);
         break;
       case 3:
-        sapeca(stepperSIM, stepperNAO, stepperESQ, stepperDIR);
+        dancinha_festa(stepperESQ, stepperDIR, stepperBASE);
         break;
       case 4:
         bravinha(stepperNAO);
@@ -199,7 +199,7 @@ void loop() {
         break;
       case 6:
         vitoria(stepperBASE, stepperESQ);
-        break;
+  
       case 7:
         tristinha(stepperSIM);
         break;
@@ -207,7 +207,7 @@ void loop() {
         amor(stepperNAO, stepperBASE, stepperESQ, stepperDIR);
         break;
       case 9:
-        dancinha_festa(stepperESQ, stepperDIR, stepperBASE);
+        sapeca(stepperSIM, stepperNAO, stepperESQ, stepperDIR);
         break;
       default:
         break;
@@ -418,26 +418,21 @@ void confusa(AccelStepper &stepperNAO, AccelStepper &stepperSIM) {
   digitalWrite(SLEEP_NAO, LOW);
 }
 
-void vitoria(AccelStepper &stepperBASE, AccelStepper &stepperESQ) {
-  virar(stepperESQ, SLEEP_ESQUERDA, 120, -1);
-  stepperESQ.setMaxSpeed(800);
-  stepperESQ.setAcceleration(1000);
-
-  virar(stepperESQ, SLEEP_ESQUERDA, 30, -1);
-  virar(stepperBASE, SLEEP_BASE, 60, -1);
-  virar(stepperESQ, SLEEP_ESQUERDA, 30, 1);
-  virar(stepperBASE, SLEEP_BASE, 120, 1);
-
-  virar(stepperESQ, SLEEP_ESQUERDA, 30, -1);
-  virar(stepperBASE, SLEEP_BASE, 120, -1);
-  virar(stepperESQ, SLEEP_ESQUERDA, 30, 1);
-  virar(stepperBASE, SLEEP_BASE, 120, 1);
-
-  stepperESQ.setMaxSpeed(300);
-  stepperESQ.setAcceleration(700);
-  voltarPara0(stepperESQ, SLEEP_ESQUERDA);
-  voltarPara0(stepperBASE, SLEEP_BASE);
-  digitalWrite(SLEEP_BASE, LOW);
+void vitoria(AccelStepper &stepperBASE, AccelStepper &stepperESQ) {  //adicionar bracinhos para cima
+  // stepperESQ.setMaxSpeed(800);
+  // stepperESQ.setAcceleration(1000);
+  // stepperBASE.setMaxSpeed(30);
+  // stepperBASE.setAcceleration(30);
+  
+  for(int i=0; i<3; i++){
+    cumprimentar(stepperESQ);
+  }
+  
+  // stepperESQ.setMaxSpeed(300);
+  // stepperESQ.setAcceleration(700);
+  // voltarPara0(stepperESQ, SLEEP_ESQUERDA);
+  // voltarPara0(stepperBASE, SLEEP_BASE);
+  // digitalWrite(SLEEP_BASE, LOW);
 
   Serial.println("LISA vitoriosa...");
 }
@@ -537,9 +532,9 @@ void dancinha_festa(AccelStepper &stepperESQ, AccelStepper &stepperDIR, AccelSte
   digitalWrite(SLEEP_ESQUERDA, HIGH);
   digitalWrite(SLEEP_BASE, HIGH);
 
-  stepperESQ.setMaxSpeed(200);
-  stepperESQ.setAcceleration(500);
-  stepperDIR.setMaxSpeed(200);
+  stepperESQ.setMaxSpeed(100);
+  stepperESQ.setAcceleration(300);
+  stepperDIR.setMaxSpeed(100);
   stepperDIR.setAcceleration(300);
   stepperBASE.setMaxSpeed(100);
   stepperBASE.setAcceleration(500);
